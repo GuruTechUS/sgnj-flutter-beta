@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sgnj/pages/gallery/photoView.dart';
 import 'package:sgnj/utils/firebase_anon_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -87,7 +88,7 @@ class _GalleryState extends State<Gallery>{
             tooltip: 'Add Photo',
             onPressed: () {
               //addPhoto();
-              //_optionsDialogBox();
+              _optionsDialogBox();
             },
           ) : Container()
         ],
@@ -131,7 +132,7 @@ class _GalleryState extends State<Gallery>{
               ));
   }
 
-  /*
+  
   addPhoto(){
     
   }
@@ -162,8 +163,8 @@ class _GalleryState extends State<Gallery>{
       );
   }
   Future openCamera() async {
-    var picture = "openCamera";
-    //var picture = await ImagePicker.pickImage(source: ImageSource.camera);
+    //var picture = "openCamera";
+    var picture = await ImagePicker.pickImage(source: ImageSource.camera);
     print(picture);
   }
 
@@ -173,6 +174,6 @@ class _GalleryState extends State<Gallery>{
     print(picture);
   }
 
-  */
+  
   
 }
