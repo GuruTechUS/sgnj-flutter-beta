@@ -235,8 +235,9 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
     "December"
   ];
 
-  displayTimeAndDate(startTime){
-    DateTime date = DateTime.parse(startTime.toString());
+  displayTimeAndDate(Timestamp startTime){
+    DateTime date = startTime.toDate();
+    //DateTime date = DateTime.parse(startTime.toString());
     print(date);
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,

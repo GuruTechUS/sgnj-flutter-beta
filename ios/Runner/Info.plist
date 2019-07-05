@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app requires access to the photo library to save user downloaded images.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to the photo library.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -42,8 +46,8 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>CFBundleURLSchemes</key>
-    <array>
-      <string>com.googleusercontent.apps.1011412602625-9crp6tgkr1udhhrr21ebdoulvtllfcqj</string>
-    </array>
+	<array>
+		<string>com.googleusercontent.apps.1011412602625-9crp6tgkr1udhhrr21ebdoulvtllfcqj</string>
+	</array>
 </dict>
 </plist>

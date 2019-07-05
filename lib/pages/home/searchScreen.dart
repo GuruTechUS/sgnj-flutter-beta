@@ -410,8 +410,8 @@ class _SearchScreenState extends State<SearchScreen> {
     "December"
   ];
 
-  displayTimeAndDate(startTime){
-    DateTime date = DateTime.parse(startTime.toString());
+  displayTimeAndDate(Timestamp startTime){
+    DateTime date = startTime.toDate();
     print(date);
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,

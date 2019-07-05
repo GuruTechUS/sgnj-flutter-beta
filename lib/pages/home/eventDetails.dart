@@ -358,7 +358,8 @@ class _EventDetailsState extends State<EventDetails>{
   ];
 
   timeAndDate(DocumentSnapshot eventData){
-    DateTime date = DateTime.parse(eventData["startTime"].toString());
+    Timestamp timestamp = eventData["startTime"];
+    DateTime date = timestamp.toDate();
     print("==================");
     print(date);
     print("==================");

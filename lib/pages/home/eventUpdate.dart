@@ -109,7 +109,7 @@ class _EventUpdateCardState extends State<EventUpdateCard>{
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         Text(
-            timeAgo.calculate(update["timestamp"]),
+            timeAgo.calculate(update["timestamp"].toDate()),
             style: TextStyle(
               fontStyle: FontStyle.italic,
               fontWeight: FontWeight.bold
