@@ -20,6 +20,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Admin Login"),
+        backgroundColor: Colors.blueAccent,
       ),
       body: SingleChildScrollView(
         child: loginForm(),

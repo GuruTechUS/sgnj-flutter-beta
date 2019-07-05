@@ -18,6 +18,10 @@ class _NotificationsState extends State<Notifications>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          title: Text('Notifications'),
+          backgroundColor: Colors.blueAccent,
+        ),
         body: Center(
         child: notificationsList(context),
     ));
@@ -39,14 +43,6 @@ class _NotificationsState extends State<Notifications>{
   renderNotificationsList(AsyncSnapshot<QuerySnapshot> snapshot){
       return CustomScrollView(
         slivers: <Widget>[
-          SliverAppBar(
-            expandedHeight: 46.0,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              centerTitle: true,
-              title: Text('Notifications')
-            ),
-          ),
           SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               return Card(

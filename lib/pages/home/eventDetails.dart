@@ -125,13 +125,14 @@ class _EventDetailsState extends State<EventDetails>{
   Widget eventPageBody(BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
     bool locationEnabled = snapshot.data["location"] != null && snapshot.data["location"] != ""?true:false;
     double updatesCardHeight = 400;
-    if(MediaQuery.of(context).size.height - (locationEnabled ? 420 : 340) < 400){
-      updatesCardHeight = MediaQuery.of(context).size.height - (locationEnabled ? 420 : 340);
+    bool isTeamSport = false;
+    if(snapshot.data["isTeamSport"] != null){
+      isTeamSport = snapshot.data["isTeamSport"];
     }
-    // int updatesCount = 0;
-    // if(snapshot.data["updates"] != null && snapshot.data["updates"].length > 0){
-    //   updatesCount = snapshot.data["updates"].length;
-    // }
+    print(MediaQuery.of(context).size.height - (locationEnabled ? 420 : 340));
+    if(MediaQuery.of(context).size.height - (locationEnabled ? 420 : 340) > 400){
+        updatesCardHeight = MediaQuery.of(context).size.height - ((locationEnabled ? 420 : 340) + (isAdminLoggedIn ? 120 : 40));
+    }
     return StaggeredGridView.count(
       crossAxisCount: 1,
       crossAxisSpacing: 10.0,
@@ -140,13 +141,13 @@ class _EventDetailsState extends State<EventDetails>{
       children: <Widget>[
         eventMainCard(context, snapshot),
         locationEnabled ? AddressCard(snapshot) : Container(),
-        submitNewUpdate(),
+        isAdminLoggedIn ? submitNewUpdate(): Container(),
         EventUpdateCard(documentId, updatesCardHeight),
       ],
       staggeredTiles: [
         StaggeredTile.extent(1, 230),
         locationEnabled ? StaggeredTile.extent(1, 80):StaggeredTile.extent(1, 0),
-        StaggeredTile.extent(1, 80),
+        isAdminLoggedIn ? StaggeredTile.extent(1, 80):StaggeredTile.extent(1, 0),
         StaggeredTile.extent(1, updatesCardHeight),
       ],
     );
@@ -219,7 +220,7 @@ class _EventDetailsState extends State<EventDetails>{
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             displaySubscribeButton(snapshot.data),
-            displayScoreCards(snapshot.data),
+            snapshot.data["isTeamSport"] == true ? displayScoreCards(snapshot.data): noScoreCard(),
             displayRound(snapshot.data)
           ],
         )
@@ -295,6 +296,16 @@ class _EventDetailsState extends State<EventDetails>{
         
       });
     });   
+  }
+
+  noScoreCard(){
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 120,
+      child: Center(
+        child: Text("No score card for this event"),
+      )
+    );
   }
   
   displayScoreCards(DocumentSnapshot eventData){
@@ -375,7 +386,7 @@ class _EventDetailsState extends State<EventDetails>{
 
   getDate(DateTime startTime){
     if(startTime != null){
-      return Text(startTime.toUtc().day.toString()+" "+months[startTime.toUtc().month]);
+      return Text(startTime.day.toString()+" "+months[startTime.month]);
     } else {
       return Text("");
     }
@@ -384,18 +395,18 @@ class _EventDetailsState extends State<EventDetails>{
   getTime(DateTime startTime){
     print(startTime);
     if(startTime != null){
-      String padding = startTime.toUtc().minute <= 9 ? "0": "";
-      String hour = startTime.toUtc().hour.toString();
+      String padding = startTime.minute <= 9 ? "0": "";
+      String hour = startTime.hour.toString();
       String sufix = "AM";
-      if(startTime.toUtc().hour >= 12){
-        hour = (startTime.toUtc().hour-12).toString();
+      if(startTime.hour >= 12){
+        hour = (startTime.hour-12).toString();
         sufix = "PM";
       }
       return Text(
         hour
         +":"
         +padding
-        +startTime.toUtc().minute.toString()
+        +startTime.minute.toString()
         +" "
         +sufix,
         style: TextStyle(
@@ -411,10 +422,7 @@ class _EventDetailsState extends State<EventDetails>{
     String status = eventData["status"];
     return Center(
       child: Text(
-        round +" - "+ status,
-        style: TextStyle(
-          fontSize: 20
-        ),
+          round +" - "+ status,
         )
     ); 
   }

@@ -94,7 +94,7 @@ class _MainScreenState extends State<MainScreen> {
 
   _searchScreen(){
     return Container(
-      height: 60,
+      //height: 60,
       width: MediaQuery.of(context).size.width,
       child: SearchScreen(),
     );
@@ -112,7 +112,7 @@ class _MainScreenState extends State<MainScreen> {
             child: Text(
           "Girls",
           style: TextStyle(
-                            color: Colors.black,
+                            color: Colors.white,
                             fontSize: 24.0,
                             fontFamily: "WorkSansSemiBold"),
           ),
@@ -127,7 +127,7 @@ class _MainScreenState extends State<MainScreen> {
           child: Text(
           "Boys",
           style: TextStyle(
-                            color: Colors.black,
+                            color: Colors.white,
                             fontSize: 24.0,
                             fontFamily: "WorkSansSemiBold"),
           ),

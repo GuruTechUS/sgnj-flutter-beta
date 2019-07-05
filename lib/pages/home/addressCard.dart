@@ -24,17 +24,12 @@ class _AddressCardState extends State<AddressCard>{
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Center(
-              child: Padding(
+            Padding(
                 padding: EdgeInsets.all(10),
-                child: Text(
+                child: Text( "Location: " + 
                   widget.eventData.data["location"],
-                  style: TextStyle(
-                    fontSize: 20,
-                  ),
                 ),
               )
-            )
           ],
         )
       )

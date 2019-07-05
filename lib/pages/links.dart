@@ -27,6 +27,10 @@ class _LinksState extends State<Links>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          title: Text('Docs/Links'),
+          backgroundColor: Colors.blueAccent,
+        ),
         body: Center(
         child: linkList(context),
     ));
@@ -48,14 +52,6 @@ class _LinksState extends State<Links>{
   renderLinkList(AsyncSnapshot<QuerySnapshot> snapshot){
       return CustomScrollView(
         slivers: <Widget>[
-          SliverAppBar(
-            expandedHeight: 46.0,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              centerTitle: true,
-              title: Text('Docs/Links')
-            ),
-          ),
           SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               return Card(

@@ -22,9 +22,11 @@ class _InfoState extends State<Info> {
   _InfoState()  {
     firebaseAuth.isLoggedIn().then((user){
       if(user.uid != null && user.uid != ""){
-        setState(() {
-          adminLoggedIn = true;
-        });
+        if(user.isAnonymous == false){
+          setState(() { 
+              adminLoggedIn = true;
+          });
+        }
       }
     });
   }
@@ -32,40 +34,10 @@ class _InfoState extends State<Info> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-        child: infoPageContent(context),
-    ));
-  }
-
-  Widget infoPageContent(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance.collection("contacts").snapshots(),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if(!snapshot.hasData){
-          return CircularProgressIndicator();
-        } else {
-          return renderLinkList(snapshot);
-        }
-      },
-    );
-  }
-
-  renderLinkList(AsyncSnapshot<QuerySnapshot> snapshot){
-      return CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            expandedHeight: 46.0,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              centerTitle: true,
-              title: Text(
-                'Info',
-                  style: TextStyle(
-                    fontSize: 20,
-                  ),
-                ),
-             ),
-             actions: <Widget>[
+        appBar: AppBar(
+          backgroundColor: Colors.blueAccent,
+          title:  Text("Info"),
+          actions: <Widget>[
                adminLoggedIn == false ?
                 IconButton(
                   icon: Icon(Icons.lock),
@@ -95,7 +67,28 @@ class _InfoState extends State<Info> {
                   },
                 )
              ],
-          ),
+        ),
+        body: Center(
+        child: infoPageContent(context),
+    ));
+  }
+
+  Widget infoPageContent(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: Firestore.instance.collection("contacts").snapshots(),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if(!snapshot.hasData){
+          return CircularProgressIndicator();
+        } else {
+          return renderLinkList(snapshot);
+        }
+      },
+    );
+  }
+
+  renderLinkList(AsyncSnapshot<QuerySnapshot> snapshot){
+      return CustomScrollView(
+        slivers: <Widget>[
           SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               return Card(

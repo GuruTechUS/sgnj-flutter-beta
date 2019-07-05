@@ -5,9 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class EditEvent extends StatefulWidget{
-  final bool gender = false;
-  final String sport = "soccer";
-  final String category = "u10";
   final String documentId;
 
   EditEvent(this.documentId);
@@ -65,7 +62,7 @@ class _EditEventState extends State<EditEvent>{
           _event.category = eventData.data["category"];
           _event.gender = eventData.data["gender"];
           _event.isTeamSport = eventData.data["isTeamSport"];
-          _event.startTime = eventData.data["startTime"];
+          _event.startTime = (eventData.data["startTime"] as Timestamp).toDate();
           _event.teams = eventData.data["teams"];
           print(_event.teams);
         }

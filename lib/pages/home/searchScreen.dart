@@ -28,6 +28,13 @@ class _SearchScreenState extends State<SearchScreen> {
 
   bool isAdminLoggedIn = false;
 
+  dynamic sport = {
+    "soccer" : "Soccer",
+    "basketball": "Basket Ball",
+    "volleyball": "Volleyball",
+    "track": "Track"
+  };
+
   Stream<QuerySnapshot> eventStream = Firestore.instance.collection("events").snapshots();
 
   FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
@@ -355,7 +362,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   displayInfo(event){
     return Text(event["gender"] == true ? "Boys":"Girls" + " / "+
-              event["sport"] + " / " + event["category"]  
+              sport[event["sport"]] + " / " + event["category"]  
               );
   }
 
@@ -424,7 +431,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   getDate(DateTime startTime){
     if(startTime != null){
-      return Text(startTime.toUtc().day.toString()+" "+months[startTime.toUtc().month]);
+      return Text(startTime.day.toString()+" "+months[startTime.month]);
     } else {
       return Text("");
     }
@@ -433,18 +440,18 @@ class _SearchScreenState extends State<SearchScreen> {
   getTime(DateTime startTime){
     print(startTime);
     if(startTime != null){
-      String padding = startTime.toUtc().minute <= 9 ? "0": "";
-      String hour = startTime.toUtc().hour.toString();
+      String padding = startTime.minute <= 9 ? "0": "";
+      String hour = startTime.hour.toString();
       String sufix = "AM";
-      if(startTime.toUtc().hour >= 12){
-        hour = (startTime.toUtc().hour-12).toString();
+      if(startTime.hour >= 12){
+        hour = (startTime.hour-12).toString();
         sufix = "PM";
       }
       return Text(
         hour
         +":"
         +padding
-        +startTime.toUtc().minute.toString()
+        +startTime.minute.toString()
         +" "
         +sufix,
         style: TextStyle(

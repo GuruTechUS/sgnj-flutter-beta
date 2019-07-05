@@ -109,7 +109,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: true,
-              title: Text('Schedule'),
+              title: Text("Schedule"),
             ),
             actions: <Widget>[
               isAdminLoggedIn ? IconButton(
@@ -250,7 +250,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
 
   getDate(DateTime startTime){
     if(startTime != null){
-      return Text(startTime.toUtc().day.toString()+" "+months[startTime.toUtc().month]);
+      return Text(startTime.day.toString()+" "+months[startTime.month]);
     } else {
       return Text("");
     }
@@ -259,18 +259,18 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
   getTime(DateTime startTime){
     print(startTime);
     if(startTime != null){
-      String padding = startTime.toUtc().minute <= 9 ? "0": "";
-      String hour = startTime.toUtc().hour.toString();
+      String padding = startTime.minute <= 9 ? "0": "";
+      String hour = startTime.hour.toString();
       String sufix = "AM";
-      if(startTime.toUtc().hour >= 12){
-        hour = (startTime.toUtc().hour-12).toString();
+      if(startTime.hour >= 12){
+        hour = (startTime.hour-12).toString();
         sufix = "PM";
       }
       return Text(
         hour
         +":"
         +padding
-        +startTime.toUtc().minute.toString()
+        +startTime.minute.toString()
         +" "
         +sufix,
         style: TextStyle(

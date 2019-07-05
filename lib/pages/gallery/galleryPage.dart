@@ -79,9 +79,8 @@ class _GalleryState extends State<Gallery>{
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          title:  Center(
-            child: Text("          Gallery")
-          ),
+          title:  Text("Gallery"),
+          backgroundColor: Colors.blueAccent,
           actions: <Widget>[
           isAdminLoggedIn ? IconButton(
             icon: Icon(Icons.add),

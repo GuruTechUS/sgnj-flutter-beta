@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'appNavBar.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-void main() => runApp(MaterialApp(
-      title: 'Sikh Games of New Jersey',
-      theme: new ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyApp(),
-    ));
+void main() {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+    .then((_) {
+     runApp(
+        MaterialApp(
+          title: 'Sikh Games of New Jersey',
+          theme: new ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: MyApp(),
+        )
+      );
+    });
+}
 
 class MyApp extends StatefulWidget {
   @override
