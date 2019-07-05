@@ -1,13 +1,52 @@
+//import 'dart:async';
+//import 'dart:io' show Platform;
+
+//import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/observer.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+void main() async{
+  /*
+  final FirebaseApp app = await FirebaseApp.configure(
+    name: 'Sikh Games of NJ',
+    options: Platform.isIOS
+        ? const FirebaseOptions(
+            googleAppID: '1:1011412602625:web:3b62606d557efe48',
+            gcmSenderID: '1011412602625',
+            databaseURL: 'https://sgofnj.firebaseio.com',
+          )
+        : const FirebaseOptions(
+            googleAppID: '1:1011412602625:web:3b62606d557efe48',
+            apiKey: 'AIzaSyCs2gqqKNJRaGMK_X6N7opHdhwnPDL5nZ8',
+            databaseURL: 'https://sgofnj.firebaseio.com',
+          ),
+  );
+  */
+
+  /*
+  await FirebaseApp.configure(
+    name: 'Sikh Games of NJ', options: FirebaseOptions(
+            googleAppID: '1:1011412602625:web:3b62606d557efe48',
+            gcmSenderID: '1011412602625',
+            apiKey: 'AIzaSyCs2gqqKNJRaGMK_X6N7opHdhwnPDL5nZ8',
+            databaseURL: 'https://sgofnj.firebaseio.com',
+            bundleID: 'com.sikhgamesofnj.app',
+            projectID: 'sgofnj'
+          ));
+          */
+  runApp(MyApp());
+} 
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Sikh Games of NJ',
+      navigatorObservers: [
+        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics()),
+      ],
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -26,6 +65,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
+
   MyHomePage({Key key, this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -45,6 +85,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+
+  @override
+  void initState() {
+   super.initState();
+  }
 
   void _incrementCounter() {
     setState(() {
