@@ -109,7 +109,11 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: true,
-              title: Text("Schedule"),
+              title: Text("Schedule: " + 
+                (gender ? "Boys": "Girls") + " / " +
+                sportsItem["title"] + " / " +
+                category["name"]
+              ),
             ),
             actions: <Widget>[
               isAdminLoggedIn ? IconButton(

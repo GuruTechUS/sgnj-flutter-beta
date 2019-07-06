@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:sgnj/utils/timeAgoCalculator.dart';
 
 class Notifications extends StatefulWidget{
   
@@ -14,6 +15,7 @@ class Notifications extends StatefulWidget{
 class _NotificationsState extends State<Notifications>{
 
   FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
+  TimeAgoCalculator timeAgo = new TimeAgoCalculator();
   
   @override
   Widget build(BuildContext context) {
@@ -63,12 +65,19 @@ class _NotificationsState extends State<Notifications>{
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text(snapshot.data.documents[index]["message"],
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold
-                            )),
-                            Text(snapshot.data.documents[index]["message"]),
+                            Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: Text(snapshot.data.documents[index]["title"],
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold
+                                  )),
+                                ),
+                                displayTimeAgo(snapshot.data.documents[index]["timestamp"])
+                              ],
+                            ),
+                            Text(snapshot.data.documents[index]["body"]),
                           ],
                         )
                       )
@@ -84,7 +93,14 @@ class _NotificationsState extends State<Notifications>{
       );
   }
 
-  
+  displayTimeAgo(Timestamp timestamp){
+    return timestamp != null ? Text(
+            timeAgo.calculate(timestamp.toDate()),
+            style: TextStyle(
+              fontStyle: FontStyle.italic
+            ),
+          ) : Text("");
+  }
 
   notificationIcon(){
     return Container(
