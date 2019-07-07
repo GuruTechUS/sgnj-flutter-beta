@@ -46,17 +46,6 @@ class _GalleryState extends State<Gallery>{
             isAdminLoggedIn = true;
           }
         });
-      } else {
-        firebaseAnonAuth.signInAnon().then((anonUser) {
-          print("==========anonUser==========");
-          print(anonUser);
-          print("==========anonUser==========");
-          if(anonUser != null && anonUser.uid != null){
-            setState(() {
-              this.userId = anonUser.uid;
-            });
-          }
-        });
       }
     });
   }
@@ -111,7 +100,7 @@ class _GalleryState extends State<Gallery>{
                             context,
                             new MaterialPageRoute(
                                 builder: (context) =>
-                                     PhotoViewer(i)));
+                                     PhotoViewer(i, isAdminLoggedIn)));
                       },
                       child: new Hero(
                         tag: wallpapersList[i].documentID,

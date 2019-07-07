@@ -21,7 +21,7 @@ class _AnimatedCountState extends AnimatedWidgetBaseState<AnimatedCount> {
   Widget build(BuildContext context) {
     return new Text(_count.evaluate(animation).toString(),
           style: TextStyle(
-            fontSize: 80,
+            fontSize: 60,
             fontStyle: FontStyle.italic
           ),  
         );

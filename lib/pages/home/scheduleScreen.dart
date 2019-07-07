@@ -190,7 +190,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
   displayTeams(teams) {
     if(teams != null && teams.length == 2){
       return Text(
-        teams[0]["name"]+" vs "+teams[1]["name"],
+        (teams[0]["name"] != null ? teams[0]["name"] : "--") + " vs " + (teams[1]["name"] != null ? teams[1]["name"] : "--"),
         style: TextStyle(
             color: Colors.black,
             fontSize: 18.0,
@@ -200,7 +200,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
         );
     } else if(teams != null && teams.length == 1){
       return Text(
-        teams[0]["name"]+" vs --",
+        (teams[0]["name"] != null ? teams[0]["name"] : "--") +" vs --",
         style: TextStyle(
             color: Colors.black,
             fontSize: 18.0,

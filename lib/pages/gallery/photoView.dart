@@ -7,15 +7,16 @@ import 'package:photo_view/photo_view_gallery.dart';
 class PhotoViewer extends StatefulWidget{
   
   final int initialIndex;
+  final bool isAdminLoggedIn;
   final PageController pageController;
   
-  PhotoViewer(this.initialIndex):
+  PhotoViewer(this.initialIndex, this.isAdminLoggedIn):
     pageController = PageController(initialPage: initialIndex);
   
 
   @override
   State<StatefulWidget> createState() {
-    return _PhotoViewerState();
+    return _PhotoViewerState(isAdminLoggedIn);
   }
 }
 
@@ -23,6 +24,9 @@ class _PhotoViewerState extends State<PhotoViewer>{
 
   int currentIndex;
   List<DocumentSnapshot> imagesList;
+  final bool isAdminLoggedIn;
+
+  _PhotoViewerState(this.isAdminLoggedIn);
 
   @override
   void initState() {
@@ -35,13 +39,13 @@ class _PhotoViewerState extends State<PhotoViewer>{
     return Scaffold(
       appBar: AppBar(
         actions: <Widget>[
-          IconButton(
+          isAdminLoggedIn ? IconButton(
             icon: Icon(Icons.delete),
             tooltip: 'Delete',
             onPressed: () {
               deleteImageLink();
             },
-          ),
+          ) : Container(),
           IconButton(
             icon: Icon(Icons.file_download),
             tooltip: 'Download',
