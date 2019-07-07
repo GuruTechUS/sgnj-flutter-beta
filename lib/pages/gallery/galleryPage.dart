@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sgnj/pages/gallery/photoView.dart';
 import 'package:sgnj/utils/firebase_anon_auth.dart';
@@ -87,7 +89,8 @@ class _GalleryState extends State<Gallery>{
             tooltip: 'Add Photo',
             onPressed: () {
               //addPhoto();
-              _optionsDialogBox();
+              //_optionsDialogBox();
+              openGallery();
             },
           ) : Container()
         ],
@@ -108,7 +111,7 @@ class _GalleryState extends State<Gallery>{
                             context,
                             new MaterialPageRoute(
                                 builder: (context) =>
-                                     PhotoViewer(wallpapersList, i)));
+                                     PhotoViewer(i)));
                       },
                       child: new Hero(
                         tag: wallpapersList[i].documentID,
@@ -131,12 +134,13 @@ class _GalleryState extends State<Gallery>{
               ));
   }
 
-  
+  /*
+
   addPhoto(){
     
   }
 
-  Future<void> _optionsDialogBox() {
+  Future<void> _optionsDialogBox() async {
     return showDialog(context: context,
       builder: (BuildContext context) {
           return AlertDialog(
@@ -161,6 +165,8 @@ class _GalleryState extends State<Gallery>{
         }
       );
   }
+  */
+
   Future openCamera() async {
     //var picture = "openCamera";
     var picture = await ImagePicker.pickImage(source: ImageSource.camera);
@@ -169,10 +175,26 @@ class _GalleryState extends State<Gallery>{
 
   Future openGallery() async {
     //var picture = "openGallery";
-    var picture = await ImagePicker.pickImage(source: ImageSource.gallery);
-    print(picture);
+    File picture = await ImagePicker.pickImage(source: ImageSource.gallery);
+    uploadImageToStorage(picture);
   }
 
+  uploadImageToStorage(File picture) async {
+    List<String> fileNameSplit = picture.toString().split(".");
+    String fileName = DateTime.now().toString() + "."+ fileNameSplit[fileNameSplit.length - 1];
+    fileName = fileName.split("'")[0];
+    final StorageReference firebaseStorageRef = FirebaseStorage.instance.ref().child("2019/"+fileName);
+    final StorageUploadTask storageUploadTask = firebaseStorageRef.putFile(picture);
+
+    final StorageTaskSnapshot downloadUrl = (await storageUploadTask.onComplete);
+    final String url = (await downloadUrl.ref.getDownloadURL());
+    saveLinkToFireStore(url);
+  }
   
+  saveLinkToFireStore(String url) async {
+    await Firestore.instance.collection("gallery").add({
+      "url": url,
+    });
+  }
   
 }

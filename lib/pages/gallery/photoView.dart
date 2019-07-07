@@ -8,9 +8,8 @@ class PhotoViewer extends StatefulWidget{
   
   final int initialIndex;
   final PageController pageController;
-  final List<DocumentSnapshot> imagesList;
-
-  PhotoViewer(this.imagesList, this.initialIndex):
+  
+  PhotoViewer(this.initialIndex):
     pageController = PageController(initialPage: initialIndex);
   
 
@@ -23,9 +22,7 @@ class PhotoViewer extends StatefulWidget{
 class _PhotoViewerState extends State<PhotoViewer>{
 
   int currentIndex;
-  
-  _PhotoViewerState(){
-  }
+  List<DocumentSnapshot> imagesList;
 
   @override
   void initState() {
@@ -42,6 +39,7 @@ class _PhotoViewerState extends State<PhotoViewer>{
             icon: Icon(Icons.delete),
             tooltip: 'Delete',
             onPressed: () {
+              deleteImageLink();
             },
           ),
           IconButton(
@@ -60,13 +58,34 @@ class _PhotoViewerState extends State<PhotoViewer>{
         constraints: BoxConstraints.expand(
             height: MediaQuery.of(context).size.height,
         ),
-        child: Stack(
+        child:  imageListStream(context)
+      ),
+    );
+  }
+
+  Widget imageListStream(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: Firestore.instance.collection("gallery").snapshots(),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if(!snapshot.hasData){
+          return CircularProgressIndicator();
+        } else {
+          //return ListView(children: getExpenseItems(snapshot));
+          return eventPageBody(snapshot);
+        }
+      },
+    );
+  }
+
+  eventPageBody(AsyncSnapshot<QuerySnapshot> imagesListLocal){
+    imagesList = imagesListLocal.data.documents;
+    return Stack(
           alignment: Alignment.bottomRight,
           children: <Widget>[
             PhotoViewGallery.builder(
                 scrollPhysics: const BouncingScrollPhysics(),
                 builder: _buildItem,
-                itemCount: widget.imagesList.length,
+                itemCount: imagesList.length,
                 loadingChild: null,
                 backgroundDecoration: const BoxDecoration(
                   color: Colors.black,
@@ -75,9 +94,23 @@ class _PhotoViewerState extends State<PhotoViewer>{
                 onPageChanged: onPageChanged,
               )
           ],
-        ),
-      ),
-    );
+        );
+  }
+
+  void deleteImageLink(){
+    int totalCount = imagesList.length;
+    if(currentIndex == 0 && totalCount == 1){
+      Firestore.instance.collection("gallery").document(imagesList[currentIndex].documentID).delete();
+      Navigator.pop(context);
+    } else if(currentIndex == 0 && totalCount > 1){
+      Firestore.instance.collection("gallery").document(imagesList[currentIndex].documentID).delete();
+    } else if (currentIndex > 0 && (totalCount - currentIndex) == 1){
+      Firestore.instance.collection("gallery").document(imagesList[currentIndex].documentID).delete();
+      currentIndex = currentIndex -1;
+    }
+    setState(() {
+      
+    });
   }
 
   void onPageChanged(int index) {
@@ -89,11 +122,11 @@ class _PhotoViewerState extends State<PhotoViewer>{
   PhotoViewGalleryPageOptions _buildItem(BuildContext context, int index) {
     //final GalleryExampleItem item = widget.galleryItems[index];
     return  PhotoViewGalleryPageOptions(
-            imageProvider: NetworkImage(widget.imagesList[index].data['url']),
+            imageProvider: NetworkImage(imagesList[index].data['url']),
             initialScale: PhotoViewComputedScale.contained,
             //minScale: PhotoViewComputedScale.contained * (0.5 + index / 10),
             //maxScale: PhotoViewComputedScale.covered * 1.1,
-            heroTag: widget.imagesList[index].documentID,
+            heroTag: imagesList[index].documentID,
           );
   }
 
@@ -101,12 +134,12 @@ class _PhotoViewerState extends State<PhotoViewer>{
     try {
       print("download start");
       // Saved with this method.
-      print(widget.imagesList[currentIndex].data['url']);
-      var imageId =  await ImageDownloader.downloadImage(widget.imagesList[currentIndex].data['url']);
+      print(imagesList[currentIndex].data['url']);
+      var imageId =  await ImageDownloader.downloadImage(imagesList[currentIndex].data['url']);
       if (imageId == null) {
         return;
-      } else if(imageId == true) {
-        print(imageId);
+      } else if(imageId != null) {
+        print("Download success");
         return;
       }
 
