@@ -25,7 +25,7 @@ class _EventUpdateCardState extends State<EventUpdateCard>{
       stream: Firestore.instance.collection("events")
                                 .document(widget.documentId)
                                 .collection("updates")
-                                .orderBy("timestamp")
+                                .orderBy("timestamp", descending: true)
                                 .snapshots(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if(!snapshot.hasData){
@@ -83,7 +83,6 @@ class _EventUpdateCardState extends State<EventUpdateCard>{
   }
 
   noUpdatesCard(){
-    print("test");
     return Card(
       child: Container(
               padding: EdgeInsets.all(10.0),

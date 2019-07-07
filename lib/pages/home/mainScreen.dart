@@ -325,10 +325,6 @@ class _MainScreenState extends State<MainScreen> {
                       fontFamily: "WorkSansSemiBold"),
                 )),
             onPressed: () {
-              print(sportsItem);
-              print(button);
-              print(gender?'boys':'girls');
-              print("test");
               Navigator.push(context, MaterialPageRoute(builder: (context) {
                 return ScheduleScreen(sportsItem, button, gender);
               }));

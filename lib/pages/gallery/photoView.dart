@@ -136,9 +136,6 @@ class _PhotoViewerState extends State<PhotoViewer>{
 
   downloadImageFile() async {
     try {
-      print("download start");
-      // Saved with this method.
-      print(imagesList[currentIndex].data['url']);
       var imageId =  await ImageDownloader.downloadImage(imagesList[currentIndex].data['url']);
       if (imageId == null) {
         return;

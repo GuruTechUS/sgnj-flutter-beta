@@ -78,7 +78,6 @@ class _SearchScreenState extends State<SearchScreen> {
       crossAxisCount: 1,
       crossAxisSpacing: 0.0,
       mainAxisSpacing: 0.0,
-      //padding: EdgeInsets.all(5.0),
       children: <Widget>[
         Container(
           color: Colors.white54,
@@ -88,7 +87,7 @@ class _SearchScreenState extends State<SearchScreen> {
         ],
       staggeredTiles: [
         StaggeredTile.extent(1, 60),
-        StaggeredTile.extent(1, MediaQuery.of(context).size.height - 270),
+        StaggeredTile.extent(1, MediaQuery.of(context).size.height - 280),
       ],
     );
   }
@@ -209,7 +208,6 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   searchBarField(){
-    //final myController = TextEditingController();
     return Container(
       width: 200,
       decoration: new BoxDecoration(
@@ -244,9 +242,6 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   updateStream() {
-    print("==========uid==========");
-    print(userId);
-    print("==========uid==========");
     CollectionReference collectionRef = Firestore.instance.collection("events");
     bool gender;
     String sport;
@@ -292,7 +287,7 @@ class _SearchScreenState extends State<SearchScreen> {
         } else {
           return Scaffold(
             body: Center(
-              child: eventsList(snapshot),
+              child: eventsListDisplay(snapshot),
             )
           );
         }
@@ -300,7 +295,25 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  eventsList(AsyncSnapshot<QuerySnapshot> snapshot){
+  eventsListDisplay(AsyncSnapshot<QuerySnapshot> snapshot){
+
+    List<dynamic> events = [];
+    if(searchSrting != null && searchSrting != ""){
+      events = snapshot.data.documents.where(
+                                (event) => (
+                                      (event["isTeamSport"] != null && event["isTeamSport"] == true) &&
+                                      (event["teams"] != null && 
+                                        (
+                                          (event["teams"][0] != null && event["teams"][0]["name"].toString().contains(searchSrting)) || 
+                                          (event["teams"][1] != null && event["teams"][1]["name"].toString().contains(searchSrting))
+                                        )
+                                      )
+                                    )
+                                ).toList();
+    } else {
+      events = snapshot.data.documents;
+    }
+
       return CustomScrollView(
         slivers: <Widget>[
           SliverList(
@@ -311,7 +324,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             context,
                             new MaterialPageRoute(
                                 builder: (context) =>
-                                     EventDetails(userId, snapshot.data.documents[index].documentID, (snapshot.data.documents[index]["gender"] ==true?"Boys":"Girls") + " / "+ snapshot.data.documents[index]["sport"] + " / "+snapshot.data.documents[index]["category"])));
+                                     EventDetails(userId, events[index].documentID, (snapshot.data.documents[index]["gender"] ==true?"Boys":"Girls") + " / "+ snapshot.data.documents[index]["sport"] + " / "+snapshot.data.documents[index]["category"])));
                       
                 },
                 child: Card(
@@ -325,12 +338,12 @@ class _SearchScreenState extends State<SearchScreen> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            displayInfo(snapshot.data.documents[index]),
-                            snapshot.data.documents[index]["isTeamSport"] != null &&
-                            snapshot.data.documents[index]["isTeamSport"] == true ?
-                             displayTeams(snapshot.data.documents[index]["teams"]) : Container(),
-                            displayLocation(snapshot.data.documents[index]["location"]),
-                            displayStatus(snapshot.data.documents[index]["status"])
+                            displayInfo(events[index]),
+                            events[index]["isTeamSport"] != null &&
+                            events[index]["isTeamSport"] == true ?
+                             displayTeams(events[index]["teams"]) : Container(),
+                            displayLocation(events[index]["location"]),
+                            displayStatus(events[index]["status"])
                           ],
                         )
                       ),
@@ -338,14 +351,14 @@ class _SearchScreenState extends State<SearchScreen> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: <Widget>[
-                          displayTimeAndDate(snapshot.data.documents[index]["startTime"]),
+                          displayTimeAndDate(events[index]["startTime"]),
                         ],
                       ),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: <Widget>[
-                          subscribeToEvent(snapshot.data.documents[index].documentID),
+                          subscribeToEvent(events[index].documentID),
                         ],
                       ) 
                     ],
@@ -353,7 +366,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
               ));
             },
-            childCount: snapshot.data.documents.length
+            childCount: events.length
             ),
           )
         ],

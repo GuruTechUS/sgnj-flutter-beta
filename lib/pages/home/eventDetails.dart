@@ -20,7 +20,7 @@ class EventDetails extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return _EventDetailsState(this.documentId);
+    return _EventDetailsState(this.documentId, title);
   }
 }
 
@@ -32,13 +32,14 @@ class _EventDetailsState extends State<EventDetails> {
   bool isAdminLoggedIn = false;
   String userId;
   final String documentId;
+  final String event;
 
   final _updatesFormKey = GlobalKey<FormState>();
   String statusUpdate = "";
 
   final FirebaseAnonAuth firebaseAnonAuth = new FirebaseAnonAuth();
 
-  _EventDetailsState(this.documentId) {
+  _EventDetailsState(this.documentId, this.event) {
     firebaseAnonAuth.isLoggedIn().then((user) {
       if (user != null && user.uid != null) {
         setState(() {
@@ -122,11 +123,7 @@ class _EventDetailsState extends State<EventDetails> {
             ? true
             : false;
     double updatesCardHeight = 400;
-    bool isTeamSport = false;
-    if (snapshot.data["isTeamSport"] != null) {
-      isTeamSport = snapshot.data["isTeamSport"];
-    }
-    print(MediaQuery.of(context).size.height - (locationEnabled ? 420 : 340));
+
     if (MediaQuery.of(context).size.height - (locationEnabled ? 420 : 340) >
         400) {
       updatesCardHeight = MediaQuery.of(context).size.height -
@@ -145,7 +142,7 @@ class _EventDetailsState extends State<EventDetails> {
                 height: 0,
               ),
         isAdminLoggedIn
-            ? submitNewUpdate()
+            ? submitNewUpdate(snapshot)
             : Container(
                 height: 0,
               ),
@@ -164,7 +161,7 @@ class _EventDetailsState extends State<EventDetails> {
     );
   }
 
-  submitNewUpdate() {
+  submitNewUpdate(AsyncSnapshot<DocumentSnapshot> eventData) {
     return Form(
         key: _updatesFormKey,
         child: Card(
@@ -191,14 +188,10 @@ class _EventDetailsState extends State<EventDetails> {
                             tooltip: 'Send',
                             onPressed: () {
                               if (_updatesFormKey.currentState.validate()) {
-                                print("===========000=========");
-                                print(statusUpdate);
-
                                 if (statusUpdate != null &&
                                     statusUpdate.trim() != "") {
                                   setState(() {
-                                    print("===========212=========");
-                                    sendUpdate();
+                                    sendUpdate(eventData, statusUpdate);
                                     statusUpdate = "";
                                     _updatesFormKey.currentState.reset();
                                   });
@@ -209,12 +202,27 @@ class _EventDetailsState extends State<EventDetails> {
                 ))));
   }
 
-  sendUpdate() async {
+  sendUpdate(AsyncSnapshot<DocumentSnapshot> eventData, String statusMessage) async {
     await Firestore.instance
         .collection("events")
         .document(documentId)
         .collection("updates")
-        .add({"content": statusUpdate, "timestamp": DateTime.now()});
+        .add({"content": statusMessage, "timestamp": DateTime.now()});
+    
+    await Firestore.instance
+        .collection("notifications")
+        .add(
+          {
+            "timestamp": DateTime.now(),
+            "topic" : documentId,
+            "event": event,
+            "title": (
+                    (eventData.data["isTeamSport"] != null && eventData.data["isTeamSport"] == true) ? 
+                    (eventData.data["teams"][0]["name"]+" vs "+eventData.data["teams"][1]["name"]): ""
+                  ),
+            "body" : statusMessage
+          }
+        );
   }
 
   Widget eventMainCard(
@@ -326,65 +334,61 @@ class _EventDetailsState extends State<EventDetails> {
               children: <Widget>[
                 Expanded(
                     child: Row(
-                    children: <Widget>[
-                      isAdminLoggedIn
-                          ? scoreUpdateButtons(0, eventData["teams"])
-                          : Container(width: 0),
-                      Expanded(
-                        child: teamBox(eventData["teams"][0]),
-                      )
-                    ],
-                  )
-                ),
+                  children: <Widget>[
+                    isAdminLoggedIn
+                        ? scoreUpdateButtons(0, eventData["teams"])
+                        : Container(width: 0),
+                    Expanded(
+                      child: teamBox(eventData["teams"][0]),
+                    )
+                  ],
+                )),
                 Container(child: vsSymbol()),
                 Expanded(
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: teamBox(eventData["teams"][1]),
-                      ),
-                      isAdminLoggedIn
-                          ? scoreUpdateButtons(1, eventData["teams"])
-                          : Container(width: 0),
-                    ],
-                  )
-                ),
+                    child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: teamBox(eventData["teams"][1]),
+                    ),
+                    isAdminLoggedIn
+                        ? scoreUpdateButtons(1, eventData["teams"])
+                        : Container(width: 0),
+                  ],
+                )),
               ],
-            )
-        )
+            ))
         : Container();
   }
 
   scoreUpdateButtons(int teamId, dynamic teams) {
     dynamic teamsTemp = teams;
-    int score = teamsTemp[teamId]["score"] != null ? teamsTemp[teamId]["score"] : 0;
+    int score =
+        teamsTemp[teamId]["score"] != null ? teamsTemp[teamId]["score"] : 0;
     return Column(children: <Widget>[
       IconButton(
-        icon: Icon(Icons.arrow_upward),
-        tooltip: 'Increase',
-        onPressed: () async {
-          score = score + 1;
-          teamsTemp[teamId]["score"] = score;
-          print(teamsTemp);
-          await Firestore.instance.collection("events").document(documentId).updateData({
-            "teams" : teamsTemp
-          });
-        }
-      ),
-      IconButton(
-        icon: Icon(Icons.arrow_downward),
-        tooltip: 'Decrease',
-        onPressed: () async {
-          if(score > 0){
-            score = score - 1;
+          icon: Icon(Icons.arrow_upward),
+          tooltip: 'Increase',
+          onPressed: () async {
+            score = score + 1;
             teamsTemp[teamId]["score"] = score;
-            print(teamsTemp);
-            await Firestore.instance.collection("events").document(documentId).updateData({
-              "teams" : teamsTemp
-            });
-          }
-        }
-      ),
+            await Firestore.instance
+                .collection("events")
+                .document(documentId)
+                .updateData({"teams": teamsTemp});
+          }),
+      IconButton(
+          icon: Icon(Icons.arrow_downward),
+          tooltip: 'Decrease',
+          onPressed: () async {
+            if (score > 0) {
+              score = score - 1;
+              teamsTemp[teamId]["score"] = score;
+              await Firestore.instance
+                  .collection("events")
+                  .document(documentId)
+                  .updateData({"teams": teamsTemp});
+            }
+          }),
     ]);
   }
 
@@ -408,9 +412,9 @@ class _EventDetailsState extends State<EventDetails> {
 
   vsSymbol() {
     return Text(
-        "vs",
-        style: TextStyle(fontSize: 24),
-      );
+      "vs",
+      style: TextStyle(fontSize: 24),
+    );
   }
 
   dynamic months = [
@@ -449,7 +453,6 @@ class _EventDetailsState extends State<EventDetails> {
   }
 
   getTime(DateTime startTime) {
-    print(startTime);
     if (startTime != null) {
       String padding = startTime.minute <= 9 ? "0" : "";
       String hour = startTime.hour.toString();

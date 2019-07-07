@@ -49,7 +49,6 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
   
   _ScheduleScreenState(this.sportsItem, this.category, this.gender)  {
     firebaseAnonAuth.isLoggedIn().then((user){
-      print(user);
       if(user != null && user.uid != null){
         setState(() {
           this.userId = user.uid;
@@ -134,7 +133,6 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
             delegate: SliverChildBuilderDelegate((context, index) {
               return InkWell(
                 onTap: (){ 
-                  print("Card Clicked"); 
                   Navigator.push(
                             context,
                             new MaterialPageRoute(
@@ -242,7 +240,6 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
   displayTimeAndDate(Timestamp startTime){
     DateTime date = startTime.toDate();
     //DateTime date = DateTime.parse(startTime.toString());
-    print(date);
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -261,7 +258,6 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
   }
 
   getTime(DateTime startTime){
-    print(startTime);
     if(startTime != null){
       String padding = startTime.minute <= 9 ? "0": "";
       String hour = startTime.hour.toString();
@@ -291,7 +287,6 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
 
   
   subscribeToEvent(documentID){
-    print("======6======");
     subscription.putIfAbsent(documentID, () => false);
     return Container(
       padding: EdgeInsets.all(10.0),
@@ -330,12 +325,9 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
   }
 
   fetchSubscriptionData(){
-    print("======4======");
     Stream<DocumentSnapshot> subscriptionSnapshot = Firestore.instance.collection("devices").document("preferences").collection(this.userId).document("subscriptions").snapshots();
   
     subscriptionSnapshot.listen((documentData) {
-      print("======5======");
-      print("check: "+documentData.data.toString());
       if (!mounted) return;
       setState(() {
         if(documentData.data == null){

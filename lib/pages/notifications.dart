@@ -31,7 +31,7 @@ class _NotificationsState extends State<Notifications>{
 
   Widget notificationsList(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance.collection("notifications").snapshots(),
+      stream: Firestore.instance.collection("notifications").orderBy("timestamp", descending: true).snapshots(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if(!snapshot.hasData){
           return CircularProgressIndicator();
@@ -68,13 +68,29 @@ class _NotificationsState extends State<Notifications>{
                             Row(
                               children: <Widget>[
                                 Expanded(
-                                  child: Text(snapshot.data.documents[index]["title"],
-                                  style: TextStyle(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.bold
-                                  )),
+                                  child: Text(snapshot.data.documents[index]["event"] != null ?
+                                    snapshot.data.documents[index]["event"]:"",
+                                    style: TextStyle(
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blueAccent
+                                    )),
                                 ),
-                                displayTimeAgo(snapshot.data.documents[index]["timestamp"])
+                                displayTimeAgo(snapshot.data.documents[index]["timestamp"]),
+                              ],
+                            ),
+                            Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: Text(snapshot.data.documents[index]["title"] != null ?
+                                  snapshot.data.documents[index]["title"]:"",
+                                    style: TextStyle(
+                                      fontSize: 15.0,
+                                      fontWeight: FontWeight.bold,
+                                      fontStyle: FontStyle.italic,
+                                      color: Colors.blueGrey
+                                    )),
+                                ),
                               ],
                             ),
                             Text(snapshot.data.documents[index]["body"]),

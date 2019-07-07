@@ -51,9 +51,6 @@ class _MyAppState extends State<MyApp> {
       print("iOS settings registered");
     });
     _firebaseMessaging.getToken().then((token) {
-      print("==============token============");
-      print(token);
-      print("==============token============");
       update(token);
     });
     super.initState();
@@ -65,6 +62,5 @@ class _MyAppState extends State<MyApp> {
   }
 
   void update(String token) {
-    print(token);
   }
 }

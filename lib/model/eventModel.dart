@@ -26,7 +26,6 @@ class EventModel {
       "isTeamSport": isTeamSport,
       "teams": teams
     });
-    print('saving event data');
     return true;
   }
 
@@ -42,7 +41,6 @@ class EventModel {
       "isTeamSport": isTeamSport,
       "teams": teams
     });
-    print("event data updated");
     return true;
   }
 

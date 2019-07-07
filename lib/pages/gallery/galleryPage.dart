@@ -36,9 +36,6 @@ class _GalleryState extends State<Gallery>{
 
   _GalleryState(){
     firebaseAnonAuth.isLoggedIn().then((user){
-      print("==========user==========");
-      print(user);
-      print("==========user==========");
       if(user != null && user.uid != null){
         setState(() {
           this.userId = user.uid;
@@ -154,13 +151,12 @@ class _GalleryState extends State<Gallery>{
         }
       );
   }
-  */
+
 
   Future openCamera() async {
-    //var picture = "openCamera";
     var picture = await ImagePicker.pickImage(source: ImageSource.camera);
-    print(picture);
   }
+  */
 
   Future openGallery() async {
     //var picture = "openGallery";
