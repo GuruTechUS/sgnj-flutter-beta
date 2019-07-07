@@ -65,7 +65,7 @@ class _EventUpdateCardState extends State<EventUpdateCard>{
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                updatesCard(snapshot.data.documents[count - (index+1)])
+                                updatesCard(snapshot.data.documents[index])
                               ],
                             )
                           ),
