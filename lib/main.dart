@@ -1,3 +1,5 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/observer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'appNavBar.dart';
@@ -8,7 +10,11 @@ void main() {
     .then((_) {
      runApp(
         MaterialApp(
-          title: 'Sikh Games of New Jersey',
+          title: 'Sikh Games of NJ',
+          debugShowCheckedModeBanner: false,
+          navigatorObservers: [
+            FirebaseAnalyticsObserver(analytics: FirebaseAnalytics()),
+          ],
           theme: new ThemeData(
             primarySwatch: Colors.blue,
           ),
