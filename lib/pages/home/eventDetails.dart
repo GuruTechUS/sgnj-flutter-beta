@@ -327,7 +327,7 @@ class _EventDetailsState extends State<EventDetails> {
                 Expanded(
                     child: Row(
                     children: <Widget>[
-                      isAdminLoggedIn == false
+                      isAdminLoggedIn
                           ? scoreUpdateButtons(0, eventData["teams"])
                           : Container(width: 0),
                       Expanded(
@@ -343,7 +343,7 @@ class _EventDetailsState extends State<EventDetails> {
                       Expanded(
                         child: teamBox(eventData["teams"][1]),
                       ),
-                      isAdminLoggedIn == false
+                      isAdminLoggedIn
                           ? scoreUpdateButtons(1, eventData["teams"])
                           : Container(width: 0),
                     ],
