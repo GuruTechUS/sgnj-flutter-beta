@@ -1,6 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:sgnj/utils/firebase_anon_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -15,9 +16,12 @@ class _LoginPageState extends State<LoginPage> {
   String _email;
   String _password;
 
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text("Admin Login"),
         backgroundColor: Colors.blueAccent,
@@ -88,12 +92,23 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  signInUser(){
-    firebaseAuth.signInEmail(_email, _password).then((onValue){
-      if(onValue.uid != null && onValue.uid != ""){
-        Navigator.pop(context, true);
+  signInUser() async {
+    try{
+      FirebaseUser userId = await firebaseAuth.signInEmail(_email,_password);
+      if(userId !=null &&  userId.uid != null && userId.uid != ""){
+            Navigator.pop(context, true);
       }
-    });
+    } catch(e){
+      if(e != null && e.message != null) {
+        _scaffoldKey.currentState.showSnackBar(
+            SnackBar(content: Text(e.message))
+        );
+      } else {
+        _scaffoldKey.currentState.showSnackBar(
+            SnackBar(content: Text('Login Failed'))
+        );
+      }
+    }
   }
   
 }

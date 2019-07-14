@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:sgnj/pages/contacts.dart';
 import 'pages/gallery/galleryPage.dart';
 import 'pages/home/homePage.dart';
 import 'pages/info.dart';
@@ -29,6 +30,9 @@ class _AppNavBarState extends State<AppNavBar> {
         return Notifications();
         break;
       case 4:
+        return Contacts();
+        break;
+      case 5:
         return Info();
         break;
       default:
@@ -49,10 +53,11 @@ class _AppNavBarState extends State<AppNavBar> {
             Icon(Icons.photo_library, size: 30),
             Icon(Icons.link, size: 30),
             Icon(Icons.notifications, size: 30),
+            Icon(Icons.contact_phone, size: 30),
             Icon(Icons.info, size: 30),
           ],
           color: Colors.white,
-          buttonBackgroundColor: Colors.white,
+          buttonBackgroundColor: Color(0xffbdc3c7),
           backgroundColor: Colors.black,
           animationCurve: Curves.easeInOut,
           animationDuration: Duration(milliseconds: 600),

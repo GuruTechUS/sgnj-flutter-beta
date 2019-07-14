@@ -5,21 +5,21 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'loginPage.dart';
 
-class Info extends StatefulWidget{
+class Contacts extends StatefulWidget{
 
   @override
   State<StatefulWidget> createState() {
-    return _InfoState();
+    return _ContactsState();
   }
 }
 
 
-class _InfoState extends State<Info> {
+class _ContactsState extends State<Contacts> {
 
   FirebaseAnonAuth firebaseAuth = FirebaseAnonAuth();
   bool adminLoggedIn = false;
 
-  _InfoState()  {
+  _ContactsState()  {
     firebaseAuth.isLoggedIn().then((user){
       if(user !=null && user.uid != null && user.uid != ""){
         if(user.isAnonymous == false){
@@ -36,7 +36,7 @@ class _InfoState extends State<Info> {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.blueAccent,
-          title:  Text("Info"),
+          title:  Text("Contacts"),
           actions: <Widget>[
                adminLoggedIn == false ?
                 IconButton(

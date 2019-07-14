@@ -18,6 +18,10 @@ class FirebaseAnonAuth {
       return user;
   }
 
+  FirebaseAuth getFirebaseAuth(){
+    return firebaseAuth;
+  }
+
   signOut(){
       return firebaseAuth.signOut();
   }
