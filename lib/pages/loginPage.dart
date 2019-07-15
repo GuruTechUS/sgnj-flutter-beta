@@ -21,94 +21,86 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: Text("Admin Login"),
-        backgroundColor: Colors.blueAccent,
-      ),
-      body: SingleChildScrollView(
-        child: loginForm(),
-      )
-    );
+        key: _scaffoldKey,
+        appBar: AppBar(
+          title: Text("Admin Login"),
+          backgroundColor: Colors.blueAccent,
+        ),
+        body: SingleChildScrollView(
+          child: loginForm(),
+        ));
   }
 
-  loginForm(){
+  loginForm() {
     return Form(
-      key: _formKey,
-      child: SafeArea(
-          child: Container(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      hintText: 'admin@sikhgamesofnj.com'
-                    ),
-                    validator: (value) {
-                      _email = value;
-                      if (value.isEmpty) {
-                        return 'Enter email';
+        key: _formKey,
+        child: SafeArea(
+            child: Container(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                TextFormField(
+                  decoration: InputDecoration(
+                      labelText: 'Email', hintText: 'admin@sikhgamesofnj.com'),
+                  validator: (value) {
+                    _email = value;
+                    if (value.isEmpty) {
+                      return 'Enter email';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  obscureText: true,
+                  decoration:
+                      InputDecoration(labelText: 'Password', hintText: '*****'),
+                  validator: (value) {
+                    _password = value;
+                    if (value.isEmpty) {
+                      return 'Enter password';
+                    }
+                    return null;
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: RaisedButton(
+                    onPressed: () {
+                      if (_formKey.currentState.validate()) {
+                        signInUser();
+                        setState(() {});
+                        //Navigator.pop(context);
                       }
-                      return null;
                     },
+                    child: Text('Login'),
                   ),
-                  TextFormField(
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      hintText: '*****'
-                    ),
-                    validator: (value) {
-                      _password = value;
-                      if (value.isEmpty) {
-                        return 'Enter password';
-                      }
-                      return null;
-                    },
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: RaisedButton(
-                      onPressed: () {
-                        if (_formKey.currentState.validate()) {
-                         
-                          signInUser();
-                          setState(() {
-                          });
-                          //Navigator.pop(context);
-                        }
-                      },
-                      child: Text('Login'),
-                    ),
-                  ),
-                ],
-              ), 
+                ),
+              ],
             ),
-          )
-      )
-    );
+          ),
+        )));
   }
 
   signInUser() async {
-    try{
-      FirebaseUser userId = await firebaseAuth.signInEmail(_email,_password);
-      if(userId !=null &&  userId.uid != null && userId.uid != ""){
-            Navigator.pop(context, true);
+    try {
+      FirebaseUser userId = await firebaseAuth.signInEmail(_email, _password);
+      if (userId != null && userId.uid != null && userId.uid != "") {
+        Navigator.pop(context, true);
       }
-    } catch(e){
-      if(e != null && e.message != null) {
-        _scaffoldKey.currentState.showSnackBar(
-            SnackBar(content: Text(e.message))
-        );
+    } catch (e) {
+      if (e != null && e.message != null) {
+        _scaffoldKey.currentState.showSnackBar(SnackBar(
+            backgroundColor: Colors.redAccent,
+            content: Text(
+              e.message,
+              style: TextStyle(color: Colors.white),
+            )));
       } else {
-        _scaffoldKey.currentState.showSnackBar(
-            SnackBar(content: Text('Login Failed'))
-        );
+        _scaffoldKey.currentState
+            .showSnackBar(SnackBar(content: Text('Login Failed')));
       }
     }
   }
-  
 }

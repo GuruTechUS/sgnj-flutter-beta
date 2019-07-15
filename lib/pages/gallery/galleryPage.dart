@@ -9,18 +9,18 @@ import 'package:sgnj/utils/firebase_anon_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:url_launcher/url_launcher.dart';
 //import 'package:image_picker/image_picker.dart';
 
-class Gallery extends StatefulWidget{
-  
+class Gallery extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     return _GalleryState();
   }
-
 }
 
-class _GalleryState extends State<Gallery>{
+class _GalleryState extends State<Gallery> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
 
@@ -31,18 +31,30 @@ class _GalleryState extends State<Gallery>{
 
   final FirebaseAnonAuth firebaseAnonAuth = new FirebaseAnonAuth();
 
+  dynamic appConfig = {};
+
   String userId;
   bool isAdminLoggedIn = false;
 
-  _GalleryState(){
-    firebaseAnonAuth.isLoggedIn().then((user){
-      if(user != null && user.uid != null){
+  _GalleryState() {
+    firebaseAnonAuth.isLoggedIn().then((user) {
+      if (user != null && user.uid != null) {
         setState(() {
           this.userId = user.uid;
-          if(user.isAnonymous == false){
+          if (user.isAnonymous == false) {
             isAdminLoggedIn = true;
           }
         });
+      }
+    });
+
+    Firestore.instance
+        .collection("app")
+        .document("config")
+        .snapshots()
+        .listen((onData) {
+      if (onData != null) {
+        appConfig = onData.data;
       }
     });
   }
@@ -66,20 +78,58 @@ class _GalleryState extends State<Gallery>{
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+        key: _scaffoldKey,
         appBar: new AppBar(
-          title:  Text("Gallery"),
+          title: Text("Gallery"),
           backgroundColor: Colors.blueAccent,
           actions: <Widget>[
-          isAdminLoggedIn ? IconButton(
-            icon: Icon(Icons.add),
-            tooltip: 'Add Photo',
-            onPressed: () {
-              //addPhoto();
-              //_optionsDialogBox();
-              openGallery();
-            },
-          ) : Container()
-        ],
+            isAdminLoggedIn
+                ? IconButton(
+                    icon: Icon(Icons.add),
+                    tooltip: 'Add Photo',
+                    onPressed: () {
+                      //addPhoto();
+                      //_optionsDialogBox();
+                      openGallery();
+                    },
+                  )
+                : FlatButton.icon(
+                    icon: Icon(Icons.send),
+                    splashColor: Colors.white,
+                    label: Text('Add photos'),
+                    textColor: Colors.white,
+                    onPressed: () async {
+                      _scaffoldKey.currentState.showSnackBar(SnackBar(
+                          backgroundColor: Colors.amber,
+                          content: Text(
+                            appConfig["submit_photos_message"] != null
+                                ? appConfig["submit_photos_message"]
+                                : 'Send us your photos on whatsapp. We will add them to the gallery once reviewed!',
+                            style: TextStyle(color: Colors.black),
+                          )));
+                      if (appConfig["submit_photos"] != null ||
+                          appConfig["submit_photos_backup"] != null) {
+                        try {
+                          if (await canLaunch(
+                              Uri.encodeFull(appConfig["submit_photos"]))) {
+                            _launchURL(
+                                Uri.encodeFull(appConfig["submit_photos"]));
+                          } else if (await canLaunch(Uri.encodeFull(
+                              appConfig["submit_photos_backup"]))) {
+                            _launchURL(Uri.encodeFull(
+                                appConfig["submit_photos_backup"]));
+                          }
+                        } catch (e) {
+                          _launchURL(Uri.encodeFull(
+                              "https://web.whatsapp.com/send?phone=14123453825&text=&source=&data="));
+                        }
+                      } else {
+                        _launchURL(Uri.encodeFull(
+                            "https://web.whatsapp.com/send?phone=14123453825&text=&source=&data="));
+                      }
+                    },
+                  )
+          ],
         ),
         body: wallpapersList != null
             ? new StaggeredGridView.countBuilder(
@@ -97,14 +147,16 @@ class _GalleryState extends State<Gallery>{
                             context,
                             new MaterialPageRoute(
                                 builder: (context) =>
-                                     PhotoViewer(i, isAdminLoggedIn)));
+                                    PhotoViewer(i, isAdminLoggedIn)));
                       },
                       child: new Hero(
                         tag: wallpapersList[i].documentID,
                         child: new FadeInImage(
-                          image: new NetworkImage(wallpapersList[i].data['url']),
+                          image:
+                              new NetworkImage(wallpapersList[i].data['url']),
                           fit: BoxFit.cover,
-                          placeholder: new AssetImage("assets/images/placeholder.png"),
+                          placeholder:
+                              new AssetImage("assets/images/placeholder.png"),
                         ),
                       ),
                     ),
@@ -120,43 +172,13 @@ class _GalleryState extends State<Gallery>{
               ));
   }
 
-  /*
-
-  addPhoto(){
-    
+  _launchURL(url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
-
-  Future<void> _optionsDialogBox() async {
-    return showDialog(context: context,
-      builder: (BuildContext context) {
-          return AlertDialog(
-            content: new SingleChildScrollView(
-              child: new ListBody(
-                children: <Widget>[
-                  GestureDetector(
-                    child: new Text('Take a picture'),
-                    onTap: openCamera,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(8.0),
-                  ),
-                  GestureDetector(
-                    child: new Text('Select from gallery'),
-                    onTap: openGallery,
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-      );
-  }
-
-
-  Future openCamera() async {
-    var picture = await ImagePicker.pickImage(source: ImageSource.camera);
-  }
-  */
 
   Future openGallery() async {
     //var picture = "openGallery";
@@ -166,20 +188,40 @@ class _GalleryState extends State<Gallery>{
 
   uploadImageToStorage(File picture) async {
     List<String> fileNameSplit = picture.toString().split(".");
-    String fileName = DateTime.now().toString() + "."+ fileNameSplit[fileNameSplit.length - 1];
+    String fileName = DateTime.now().toString() +
+        "." +
+        fileNameSplit[fileNameSplit.length - 1];
     fileName = fileName.split("'")[0];
-    final StorageReference firebaseStorageRef = FirebaseStorage.instance.ref().child("2019/"+fileName);
-    final StorageUploadTask storageUploadTask = firebaseStorageRef.putFile(picture);
+    final StorageReference firebaseStorageRef =
+        FirebaseStorage.instance.ref().child("2019/" + fileName);
+    final StorageUploadTask storageUploadTask =
+        firebaseStorageRef.putFile(picture);
 
-    final StorageTaskSnapshot downloadUrl = (await storageUploadTask.onComplete);
+    final StorageTaskSnapshot downloadUrl =
+        (await storageUploadTask.onComplete);
     final String url = (await downloadUrl.ref.getDownloadURL());
-    saveLinkToFireStore(url);
+    if (url != null) {
+      saveLinkToFireStore(url);
+    } else {
+       _scaffoldKey.currentState.showSnackBar(SnackBar(
+        backgroundColor: Colors.redAccent,
+        content: Text(
+          "Uploaded Failed!",
+          style: TextStyle(color: Colors.white),
+        )));
+    }
   }
-  
+
   saveLinkToFireStore(String url) async {
     await Firestore.instance.collection("gallery").add({
       "url": url,
     });
+
+    _scaffoldKey.currentState.showSnackBar(SnackBar(
+        backgroundColor: Colors.amber,
+        content: Text(
+          "Uploaded Successfully..!",
+          style: TextStyle(color: Colors.black),
+        )));
   }
-  
 }

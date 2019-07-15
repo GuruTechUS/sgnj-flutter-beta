@@ -3,8 +3,6 @@ import 'package:sgnj/utils/firebase_anon_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'loginPage.dart';
-
 class Contacts extends StatefulWidget{
 
   @override
@@ -20,15 +18,15 @@ class _ContactsState extends State<Contacts> {
   bool adminLoggedIn = false;
 
   _ContactsState()  {
-    firebaseAuth.isLoggedIn().then((user){
-      if(user !=null && user.uid != null && user.uid != ""){
-        if(user.isAnonymous == false){
-          setState(() { 
-              adminLoggedIn = true;
-          });
-        }
-      }
-    });
+    // firebaseAuth.isLoggedIn().then((user){
+    //   if(user !=null && user.uid != null && user.uid != ""){
+    //     if(user.isAnonymous == false){
+    //       setState(() { 
+    //           adminLoggedIn = true;
+    //       });
+    //     }
+    //   }
+    // });
   }
   
   @override
@@ -37,36 +35,6 @@ class _ContactsState extends State<Contacts> {
         appBar: AppBar(
           backgroundColor: Colors.blueAccent,
           title:  Text("Contacts"),
-          actions: <Widget>[
-               adminLoggedIn == false ?
-                IconButton(
-                  icon: Icon(Icons.lock),
-                  tooltip: 'Login',
-                  onPressed: () async {
-                    final result = await Navigator.push(
-                            context,
-                            new MaterialPageRoute(
-                                builder: (context) =>
-                                     LoginPage()));
-                    if(result == true){
-                      setState(() {
-                        adminLoggedIn = true;
-                      });
-                    }
-                  },
-                ) : 
-                IconButton(
-                  icon: Icon(Icons.lock_open),
-                  tooltip: 'Logout',
-                  onPressed: () {
-                    firebaseAuth.signOut().then((data){
-                      setState(() {
-                        adminLoggedIn = false;
-                      });
-                    });
-                  },
-                )
-             ],
         ),
         body: Center(
         child: infoPageContent(context),

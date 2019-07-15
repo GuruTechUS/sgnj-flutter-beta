@@ -4,15 +4,13 @@ import 'package:image_downloader/image_downloader.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
-class PhotoViewer extends StatefulWidget{
-  
+class PhotoViewer extends StatefulWidget {
   final int initialIndex;
   final bool isAdminLoggedIn;
   final PageController pageController;
-  
-  PhotoViewer(this.initialIndex, this.isAdminLoggedIn):
-    pageController = PageController(initialPage: initialIndex);
-  
+
+  PhotoViewer(this.initialIndex, this.isAdminLoggedIn)
+      : pageController = PageController(initialPage: initialIndex);
 
   @override
   State<StatefulWidget> createState() {
@@ -20,13 +18,14 @@ class PhotoViewer extends StatefulWidget{
   }
 }
 
-class _PhotoViewerState extends State<PhotoViewer>{
-
+class _PhotoViewerState extends State<PhotoViewer> {
   int currentIndex;
   List<DocumentSnapshot> imagesList;
   final bool isAdminLoggedIn;
 
   _PhotoViewerState(this.isAdminLoggedIn);
+
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -37,15 +36,18 @@ class _PhotoViewerState extends State<PhotoViewer>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         actions: <Widget>[
-          isAdminLoggedIn ? IconButton(
-            icon: Icon(Icons.delete),
-            tooltip: 'Delete',
-            onPressed: () {
-              deleteImageLink();
-            },
-          ) : Container(),
+          isAdminLoggedIn
+              ? IconButton(
+                  icon: Icon(Icons.delete),
+                  tooltip: 'Delete',
+                  onPressed: () {
+                    deleteImageLink();
+                  },
+                )
+              : Container(),
           IconButton(
             icon: Icon(Icons.file_download),
             tooltip: 'Download',
@@ -56,14 +58,11 @@ class _PhotoViewerState extends State<PhotoViewer>{
         ],
       ),
       body: Container(
-        decoration: BoxDecoration(
-          color: Colors.black
-        ),
-        constraints: BoxConstraints.expand(
+          decoration: BoxDecoration(color: Colors.black),
+          constraints: BoxConstraints.expand(
             height: MediaQuery.of(context).size.height,
-        ),
-        child:  imageListStream(context)
-      ),
+          ),
+          child: imageListStream(context)),
     );
   }
 
@@ -71,7 +70,7 @@ class _PhotoViewerState extends State<PhotoViewer>{
     return StreamBuilder<QuerySnapshot>(
       stream: Firestore.instance.collection("gallery").snapshots(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if(!snapshot.hasData){
+        if (!snapshot.hasData) {
           return CircularProgressIndicator();
         } else {
           //return ListView(children: getExpenseItems(snapshot));
@@ -81,40 +80,47 @@ class _PhotoViewerState extends State<PhotoViewer>{
     );
   }
 
-  eventPageBody(AsyncSnapshot<QuerySnapshot> imagesListLocal){
+  eventPageBody(AsyncSnapshot<QuerySnapshot> imagesListLocal) {
     imagesList = imagesListLocal.data.documents;
     return Stack(
-          alignment: Alignment.bottomRight,
-          children: <Widget>[
-            PhotoViewGallery.builder(
-                scrollPhysics: const BouncingScrollPhysics(),
-                builder: _buildItem,
-                itemCount: imagesList.length,
-                loadingChild: null,
-                backgroundDecoration: const BoxDecoration(
-                  color: Colors.black,
-                ),
-                pageController: widget.pageController,
-                onPageChanged: onPageChanged,
-              )
-          ],
-        );
+      alignment: Alignment.bottomRight,
+      children: <Widget>[
+        PhotoViewGallery.builder(
+          scrollPhysics: const BouncingScrollPhysics(),
+          builder: _buildItem,
+          itemCount: imagesList.length,
+          loadingChild: null,
+          backgroundDecoration: const BoxDecoration(
+            color: Colors.black,
+          ),
+          pageController: widget.pageController,
+          onPageChanged: onPageChanged,
+        )
+      ],
+    );
   }
 
-  void deleteImageLink(){
+  void deleteImageLink() {
     int totalCount = imagesList.length;
-    if(currentIndex == 0 && totalCount == 1){
-      Firestore.instance.collection("gallery").document(imagesList[currentIndex].documentID).delete();
+    if (currentIndex == 0 && totalCount == 1) {
+      Firestore.instance
+          .collection("gallery")
+          .document(imagesList[currentIndex].documentID)
+          .delete();
       Navigator.pop(context);
-    } else if(currentIndex == 0 && totalCount > 1){
-      Firestore.instance.collection("gallery").document(imagesList[currentIndex].documentID).delete();
-    } else if (currentIndex > 0 && (totalCount - currentIndex) == 1){
-      Firestore.instance.collection("gallery").document(imagesList[currentIndex].documentID).delete();
-      currentIndex = currentIndex -1;
+    } else if (currentIndex == 0 && totalCount > 1) {
+      Firestore.instance
+          .collection("gallery")
+          .document(imagesList[currentIndex].documentID)
+          .delete();
+    } else if (currentIndex > 0 && (totalCount - currentIndex) == 1) {
+      Firestore.instance
+          .collection("gallery")
+          .document(imagesList[currentIndex].documentID)
+          .delete();
+      currentIndex = currentIndex - 1;
     }
-    setState(() {
-      
-    });
+    setState(() {});
   }
 
   void onPageChanged(int index) {
@@ -125,29 +131,40 @@ class _PhotoViewerState extends State<PhotoViewer>{
 
   PhotoViewGalleryPageOptions _buildItem(BuildContext context, int index) {
     //final GalleryExampleItem item = widget.galleryItems[index];
-    return  PhotoViewGalleryPageOptions(
-            imageProvider: NetworkImage(imagesList[index].data['url']),
-            initialScale: PhotoViewComputedScale.contained,
-            //minScale: PhotoViewComputedScale.contained * (0.5 + index / 10),
-            //maxScale: PhotoViewComputedScale.covered * 1.1,
-            heroTag: imagesList[index].documentID,
-          );
+    return PhotoViewGalleryPageOptions(
+      imageProvider: NetworkImage(imagesList[index].data['url']),
+      initialScale: PhotoViewComputedScale.contained,
+      //minScale: PhotoViewComputedScale.contained * (0.5 + index / 10),
+      //maxScale: PhotoViewComputedScale.covered * 1.1,
+      heroTag: imagesList[index].documentID,
+    );
   }
 
   downloadImageFile() async {
     try {
-      var imageId =  await ImageDownloader.downloadImage(imagesList[currentIndex].data['url']);
+      var imageId = await ImageDownloader.downloadImage(
+          imagesList[currentIndex].data['url']);
       if (imageId == null) {
         return;
-      } else if(imageId != null) {
+      } else if (imageId != null) {
         print("Download success");
+        _scaffoldKey.currentState.showSnackBar(SnackBar(
+            backgroundColor: Colors.greenAccent,
+            content: Text(
+              "Downloaded Successfully..!",
+              style: TextStyle(color: Colors.black),
+            )));
         return;
       }
-
     } on Exception catch (error) {
-      print("download failed"); 
+      print("download failed");
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+            backgroundColor: Colors.amber,
+            content: Text(
+              "Download Failed..!",
+              style: TextStyle(color: Colors.black),
+            )));
       print(error);
     }
   }
-
 }

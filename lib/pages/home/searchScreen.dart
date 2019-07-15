@@ -218,7 +218,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     bottomLeft: const  Radius.circular(25.0),
                     bottomRight: const  Radius.circular(25.0))
                 ),
-                padding: EdgeInsets.only(left:10, right: 10),
+                padding: EdgeInsets.only(left:10, right: 10, top:5),
                 margin: EdgeInsets.all(5),
       child: Column(
           children: <Widget>[
@@ -304,8 +304,8 @@ class _SearchScreenState extends State<SearchScreen> {
                                       (event["isTeamSport"] != null && event["isTeamSport"] == true) &&
                                       (event["teams"] != null && 
                                         (
-                                          (event["teams"][0] != null && event["teams"][0]["name"].toString().contains(searchSrting)) || 
-                                          (event["teams"][1] != null && event["teams"][1]["name"].toString().contains(searchSrting))
+                                          (event["teams"][0] != null && event["teams"][0]["name"].toString().toUpperCase().contains(searchSrting.toUpperCase())) || 
+                                          (event["teams"][1] != null && event["teams"][1]["name"].toString().toUpperCase().contains(searchSrting.toUpperCase()))
                                         )
                                       )
                                     )
