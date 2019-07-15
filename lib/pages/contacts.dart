@@ -145,8 +145,8 @@ class _ContactsState extends State<Contacts> {
   }
 
   _launchURL(url) async {
-    if (await canLaunch("tel://"+url)) {
-      await launch("tel://"+url);
+    if (await canLaunch("tel:"+url)) {
+      await launch("tel:"+url);
     } else {
       throw 'Could not launch $url';
     }

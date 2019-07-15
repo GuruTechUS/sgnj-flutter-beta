@@ -128,6 +128,24 @@ class _InfoState extends State<Info> {
             ],
           )),
         )),
+        snapshot.data.data["feedback"] != null ? InkWell(
+          onTap: () {
+            _launchURL(Uri.encodeFull(snapshot.data.data["feedback"]));
+          },
+          child: Card(
+            child: ListTile(
+              leading: Icon(Icons.feedback, color: Colors.green),
+              title: Text(
+                snapshot.data.data["feedback-title"] ?? "Give us your feedback",
+                style: TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18),
+              ),
+              trailing: Icon(Icons.chevron_right),
+            ),
+          ),
+        ): Container(),
         Padding(
           padding: EdgeInsets.all(20),
           child: Text(
@@ -154,7 +172,7 @@ class _InfoState extends State<Info> {
         ),
         snapshot.data.data["phone"] != null ? InkWell(
           onTap: () {
-            _launchURL("tel://" + Uri.encodeFull(snapshot.data.data["phone"]));
+            _launchURL("tel:" + Uri.encodeFull(snapshot.data.data["phone"]));
           },
           child: Card(
             child: ListTile(
@@ -170,8 +188,8 @@ class _InfoState extends State<Info> {
         ): Container(),
         snapshot.data.data["email"] != null ? InkWell(
           onTap: () {
-            _launchURL(
-                "mailto://" + Uri.encodeFull(snapshot.data.data["email"]));
+            _launchURL( Uri.encodeFull(snapshot.data.data["email-link"]) ??
+                ("mailto:" + Uri.encodeFull(snapshot.data.data["email"])));
           },
           child: Card(
             child: ListTile(
@@ -205,24 +223,7 @@ class _InfoState extends State<Info> {
             ),
           ),
         ): Container(),
-        snapshot.data.data["feedback"] != null ? InkWell(
-          onTap: () {
-            _launchURL(Uri.encodeFull(snapshot.data.data["feedback"]));
-          },
-          child: Card(
-            child: ListTile(
-              leading: Icon(Icons.feedback, color: Colors.green),
-              title: Text(
-                "Give us your feedback",
-                style: TextStyle(
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18),
-              ),
-              trailing: Icon(Icons.chevron_right),
-            ),
-          ),
-        ): Container(),
+        
       ],
     );
   }
