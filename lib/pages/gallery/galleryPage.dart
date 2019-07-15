@@ -12,6 +12,10 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 //import 'package:image_picker/image_picker.dart';
 
+import 'dart:isolate';
+import 'package:image/image.dart' as IMG;
+import 'package:path_provider/path_provider.dart';
+
 class Gallery extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -25,7 +29,7 @@ class _GalleryState extends State<Gallery> {
   FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
 
   StreamSubscription<QuerySnapshot> subscription;
-  List<DocumentSnapshot> wallpapersList;
+  List<DocumentSnapshot> photoList;
   final CollectionReference collectionReference =
       Firestore.instance.collection("gallery");
 
@@ -64,7 +68,7 @@ class _GalleryState extends State<Gallery> {
     super.initState();
     subscription = collectionReference.snapshots().listen((datasnapshot) {
       setState(() {
-        wallpapersList = datasnapshot.documents;
+        photoList = datasnapshot.documents;
       });
     });
   }
@@ -131,11 +135,11 @@ class _GalleryState extends State<Gallery> {
                   )
           ],
         ),
-        body: wallpapersList != null
+        body: photoList != null
             ? new StaggeredGridView.countBuilder(
                 padding: const EdgeInsets.all(8.0),
                 crossAxisCount: 4,
-                itemCount: wallpapersList.length,
+                itemCount: photoList.length,
                 itemBuilder: (context, i) {
                   return new Material(
                     elevation: 8.0,
@@ -150,10 +154,9 @@ class _GalleryState extends State<Gallery> {
                                     PhotoViewer(i, isAdminLoggedIn)));
                       },
                       child: new Hero(
-                        tag: wallpapersList[i].documentID,
+                        tag: photoList[i].documentID,
                         child: new FadeInImage(
-                          image:
-                              new NetworkImage(wallpapersList[i].data['url']),
+                          image: new NetworkImage(photoList[i].data['thumbnailUrl'] ?? photoList[i].data['url']),
                           fit: BoxFit.cover,
                           placeholder:
                               new AssetImage("assets/images/placeholder.png"),
@@ -192,6 +195,10 @@ class _GalleryState extends State<Gallery> {
         "." +
         fileNameSplit[fileNameSplit.length - 1];
     fileName = fileName.split("'")[0];
+
+    File thumbnail = await generateThumbnail(picture, "thumbnail_" + fileName);
+
+    
     final StorageReference firebaseStorageRef =
         FirebaseStorage.instance.ref().child("2019/" + fileName);
     final StorageUploadTask storageUploadTask =
@@ -200,8 +207,21 @@ class _GalleryState extends State<Gallery> {
     final StorageTaskSnapshot downloadUrl =
         (await storageUploadTask.onComplete);
     final String url = (await downloadUrl.ref.getDownloadURL());
-    if (url != null) {
-      saveLinkToFireStore(url);
+
+
+    /* Thumbnail */
+
+    final StorageReference firebaseStorageThumbnailRef =
+        FirebaseStorage.instance.ref().child("2019_thumbnails/" + fileName);
+    final StorageUploadTask storageUploadThumbnailTask =
+        firebaseStorageThumbnailRef.putFile(thumbnail);
+
+    final StorageTaskSnapshot thumbnailDownloadUrl =
+        (await storageUploadThumbnailTask.onComplete);
+    final String thumbnailUrl = (await thumbnailDownloadUrl.ref.getDownloadURL());
+
+    if (url != null && thumbnailUrl != null) {
+      saveLinkToFireStore(url, thumbnailUrl);
     } else {
        _scaffoldKey.currentState.showSnackBar(SnackBar(
         backgroundColor: Colors.redAccent,
@@ -210,11 +230,38 @@ class _GalleryState extends State<Gallery> {
           style: TextStyle(color: Colors.white),
         )));
     }
+    
   }
 
-  saveLinkToFireStore(String url) async {
+  Future<File> generateThumbnail(File picture, filename) async {
+    final bytes = await picture.readAsBytes();
+
+    IMG.Image image = IMG.decodeImage(bytes);
+    IMG.Image thumbnail = IMG.copyResize(
+      image,
+      width: 400,
+    );
+    File tn = await _localFile(filename);
+    tn.writeAsBytesSync(IMG.encodePng(thumbnail));
+    print(picture.lengthSync());
+    print(tn.lengthSync());
+    return tn;
+  }
+
+  Future<String> get _localPath async {
+    final directory = await getTemporaryDirectory();
+    return directory.path;
+  }
+
+  Future<File> _localFile(String fileName) async {
+  final path = await _localPath;
+  return File('$path/$fileName');
+}
+
+  saveLinkToFireStore(String url, String thumbnailUrl) async {
     await Firestore.instance.collection("gallery").add({
       "url": url,
+      "thumbnailUrl": thumbnailUrl
     });
 
     _scaffoldKey.currentState.showSnackBar(SnackBar(

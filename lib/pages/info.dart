@@ -18,7 +18,6 @@ class _InfoState extends State<Info> {
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-
   _InfoState() {
     firebaseAuth.isLoggedIn().then((user) {
       if (user != null && user.uid != null && user.uid != "") {
@@ -55,11 +54,11 @@ class _InfoState extends State<Info> {
                           adminLoggedIn = true;
                         });
                         _scaffoldKey.currentState.showSnackBar(SnackBar(
-                              backgroundColor: Colors.greenAccent,
-                              content: Text(
-                                "Admin Logged-In Successfully..!",
-                                style: TextStyle(color: Colors.black),
-                              )));
+                            backgroundColor: Colors.greenAccent,
+                            content: Text(
+                              "Admin Logged-In Successfully..!",
+                              style: TextStyle(color: Colors.black),
+                            )));
                       }
                     },
                   )
@@ -74,9 +73,9 @@ class _InfoState extends State<Info> {
                           adminLoggedIn = false;
                         });
                         _scaffoldKey.currentState.showSnackBar(SnackBar(
-                              content: Text(
-                                "Admin Logged-Out!",
-                              )));
+                            content: Text(
+                          "Admin Logged-Out!",
+                        )));
                       });
                     },
                   )
@@ -88,8 +87,9 @@ class _InfoState extends State<Info> {
   }
 
   Widget infoPageContent(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance.collection("contacts").snapshots(),
+    return StreamBuilder<DocumentSnapshot>(
+      stream:
+          Firestore.instance.collection("app").document("about-us").snapshots(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (!snapshot.hasData) {
           return CircularProgressIndicator();
@@ -100,94 +100,136 @@ class _InfoState extends State<Info> {
     );
   }
 
-  renderLinkList(AsyncSnapshot<QuerySnapshot> snapshot) {
-    return CustomScrollView(
-      slivers: <Widget>[
-        SliverList(
-          delegate: SliverChildBuilderDelegate((context, index) {
-            return Card(
-              child: new Container(
-                  padding: EdgeInsets.all(10.0),
-                  child: Column(
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: <Widget>[
-                              contactIcon(),
-                            ],
-                          ),
-                          Expanded(
-                              child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(snapshot.data.documents[index]["name"],
-                                  style: TextStyle(
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.bold)),
-                              Text(snapshot.data.documents[index]["number"])
-                              //  displayTeams(snapshot.data.documents[index]["teams"]),
-                            ],
-                          )),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: <Widget>[
-                              openButton(
-                                  snapshot.data.documents[index]["number"]),
-                            ],
-                          )
-                        ],
-                      ),
-                      moreInfo(snapshot.data.documents[index]["info"])
-                    ],
-                  )),
-            );
-          }, childCount: snapshot.data.documents.length),
-        )
-      ],
-    );
-  }
-
-  moreInfo(info) {
-    return Row(
+  renderLinkList(AsyncSnapshot<DocumentSnapshot> snapshot) {
+    // return Text(snapshot.data.data.toString());
+    return ListView(
       children: <Widget>[
-        Expanded(
-          child: Text(info),
-        )
+        Card(
+            child: new Container(
+          padding: EdgeInsets.all(10.0),
+          child: Center(
+              child: Column(
+            children: <Widget>[
+              Container(
+                child: Padding(
+                  padding: EdgeInsets.all(30),
+                  child: Image.asset(
+                    "assets/images/logo.png",
+                    height: 120,
+                  ),
+                ),
+              ),
+              Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Text(
+                    snapshot.data.data["app-name"] ??= "",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ))
+            ],
+          )),
+        )),
+        Padding(
+          padding: EdgeInsets.all(20),
+          child: Text(
+            snapshot.data.data["tag-line"] ??= "",
+            style: TextStyle(
+              color: Colors.black87,
+              fontWeight: FontWeight.bold,
+              fontSize: 18
+              //  fontStyle: FontStyle.italic
+            ),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            leading: Image.asset(
+              "assets/images/gurutech.png",
+              height: 34,
+            ),
+            title: Text(
+              snapshot.data.data["name"] ??= "",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+        snapshot.data.data["phone"] != null ? InkWell(
+          onTap: () {
+            _launchURL("tel://" + Uri.encodeFull(snapshot.data.data["phone"]));
+          },
+          child: Card(
+            child: ListTile(
+              leading: Icon(Icons.local_phone, color: Colors.blueAccent),
+              title: Text(
+                snapshot.data.data["phone"] ??= "",
+                style:
+                    TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
+              ),
+              trailing: Icon(Icons.chevron_right),
+            ),
+          ),
+        ): Container(),
+        snapshot.data.data["email"] != null ? InkWell(
+          onTap: () {
+            _launchURL(
+                "mailto://" + Uri.encodeFull(snapshot.data.data["email"]));
+          },
+          child: Card(
+            child: ListTile(
+              leading: Icon(Icons.email, color: Colors.blueAccent),
+              title: Text(
+                snapshot.data.data["email"] ??= "",
+                style: TextStyle(
+                    color: Colors.blueAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18),
+              ),
+              trailing: Icon(Icons.chevron_right),
+            ),
+          ),
+        ): Container(),
+        snapshot.data.data["web"] != null ? InkWell(
+          onTap: () {
+            _launchURL(Uri.encodeFull(snapshot.data.data["web"]));
+          },
+          child: Card(
+            child: ListTile(
+              leading: Icon(Icons.web, color: Colors.blueAccent),
+              title: Text(
+                snapshot.data.data["web"] ??= "",
+                style: TextStyle(
+                    color: Colors.blueAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18),
+              ),
+              trailing: Icon(Icons.chevron_right),
+            ),
+          ),
+        ): Container(),
+        snapshot.data.data["feedback"] != null ? InkWell(
+          onTap: () {
+            _launchURL(Uri.encodeFull(snapshot.data.data["feedback"]));
+          },
+          child: Card(
+            child: ListTile(
+              leading: Icon(Icons.feedback, color: Colors.green),
+              title: Text(
+                "Give us your feedback",
+                style: TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18),
+              ),
+              trailing: Icon(Icons.chevron_right),
+            ),
+          ),
+        ): Container(),
       ],
     );
-  }
-
-  openButton(url) {
-    return Container(
-        padding: EdgeInsets.all(10.0),
-        child: InkWell(
-            onTap: () {
-              _launchURL(Uri.encodeFull(url));
-            },
-            child: Image.asset(
-              "assets/images/call.png",
-              width: 30,
-            )));
-  }
-
-  contactIcon() {
-    return Container(
-        padding: EdgeInsets.all(10.0),
-        child: Image.asset(
-          "assets/images/contact.png",
-          width: 30,
-        ));
   }
 
   _launchURL(url) async {
-    if (await canLaunch("tel://" + url)) {
-      await launch("tel://" + url);
+    if (await canLaunch(url)) {
+      await launch(url);
     } else {
       throw 'Could not launch $url';
     }
