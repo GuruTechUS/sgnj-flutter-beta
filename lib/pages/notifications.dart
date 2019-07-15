@@ -45,7 +45,14 @@ class _NotificationsState extends State<Notifications>{
   renderNotificationsList(AsyncSnapshot<QuerySnapshot> snapshot){
       return CustomScrollView(
         slivers: <Widget>[
-          SliverList(
+          snapshot.data.documents.length == 0
+            ? SliverFillRemaining(
+              child:Card(
+                child: Center(
+                  child: Text("No notifications available!!"),
+                ),
+              ))
+        : SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               return Card(
                 child: new Container(

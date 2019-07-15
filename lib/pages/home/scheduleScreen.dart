@@ -12,19 +12,15 @@ import 'package:sgnj/utils/firebase_anon_auth.dart';
 // }
 
 class ScheduleScreen extends StatefulWidget {
-
   final dynamic sportsItem;
   final dynamic category;
   final bool gender;
 
-  
-  ScheduleScreen(this.sportsItem, this.category, this.gender){
+  ScheduleScreen(this.sportsItem, this.category, this.gender) {
     fetchUserToken();
   }
 
-  fetchUserToken() async {
-    
-  }
+  fetchUserToken() async {}
 
   @override
   State<StatefulWidget> createState() {
@@ -32,8 +28,7 @@ class ScheduleScreen extends StatefulWidget {
   }
 }
 
-class _ScheduleScreenState extends State<ScheduleScreen>{
-
+class _ScheduleScreenState extends State<ScheduleScreen> {
   final dynamic sportsItem;
   final dynamic category;
   final bool gender;
@@ -46,20 +41,20 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
   final FirebaseAnonAuth firebaseAnonAuth = new FirebaseAnonAuth();
 
   FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
-  
-  _ScheduleScreenState(this.sportsItem, this.category, this.gender)  {
-    firebaseAnonAuth.isLoggedIn().then((user){
-      if(user != null && user.uid != null){
+
+  _ScheduleScreenState(this.sportsItem, this.category, this.gender) {
+    firebaseAnonAuth.isLoggedIn().then((user) {
+      if (user != null && user.uid != null) {
         setState(() {
           this.userId = user.uid;
-          if(user.isAnonymous == false){
+          if (user.isAnonymous == false) {
             isAdminLoggedIn = true;
           }
         });
         fetchUserPreferences();
       } else {
         firebaseAnonAuth.signInAnon().then((anonUser) {
-          if(anonUser != null && anonUser.uid != null){
+          if (anonUser != null && anonUser.uid != null) {
             setState(() {
               this.userId = anonUser.uid;
             });
@@ -71,26 +66,27 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
   }
 
   fetchUserPreferences() async {
-      await fetchSubscriptionData();
+    await fetchSubscriptionData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: Center(
-        child: scheduleList(context),
+      child: scheduleList(context),
     ));
   }
 
   Widget scheduleList(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance.collection("events")
-                                .where("category", isEqualTo: category["name"])
-                                .where("gender", isEqualTo: gender)
-                                .where("sport", isEqualTo: sportsItem["name"])
-                                .snapshots(),
+      stream: Firestore.instance
+          .collection("events")
+          .where("category", isEqualTo: category["name"])
+          .where("gender", isEqualTo: gender)
+          .where("sport", isEqualTo: sportsItem["name"])
+          .snapshots(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if(!snapshot.hasData){
+        if (!snapshot.hasData) {
           return CircularProgressIndicator();
         } else {
           //return ListView(children: getExpenseItems(snapshot));
@@ -100,123 +96,134 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
     );
   }
 
-  eventsList(AsyncSnapshot<QuerySnapshot> snapshot){
-      return CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            expandedHeight: 50.0,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              centerTitle: true,
-              title: Text("Schedule: " + 
-                (gender ? "Boys": "Girls") + " / " +
-                sportsItem["title"] + " / " +
-                category["name"]
-              ),
-            ),
-            actions: <Widget>[
-              isAdminLoggedIn ? IconButton(
-                icon: Icon(Icons.add),
-                tooltip: 'Download',
-                onPressed: () {
-                  Navigator.push(
-                            context,
-                            new MaterialPageRoute(
-                                builder: (context) =>
-                                     AddEvent(gender, sportsItem["name"], category["name"])));
-                  
-                },
-              ): Container(),
-            ],
+  eventsList(AsyncSnapshot<QuerySnapshot> snapshot) {
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverAppBar(
+          expandedHeight: 50.0,
+          pinned: true,
+          flexibleSpace: FlexibleSpaceBar(
+            centerTitle: true,
+            title: Text("Schedule: " +
+                (gender ? "Boys" : "Girls") +
+                " / " +
+                sportsItem["title"] +
+                " / " +
+                category["name"]),
           ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              return InkWell(
-                onTap: (){ 
+          actions: <Widget>[
+            isAdminLoggedIn
+                ? IconButton(
+                    icon: Icon(Icons.add),
+                    tooltip: 'Download',
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          new MaterialPageRoute(
+                              builder: (context) => AddEvent(gender,
+                                  sportsItem["name"], category["name"])));
+                    },
+                  )
+                : Container(),
+          ],
+        ),
+        snapshot.data.documents.length == 0
+            ? SliverFillRemaining(
+              child:Card(
+                child: Center(
+                  child: Text("No events available yet!"),
+                ),
+              ))
+        : 
+        SliverList(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            return InkWell(
+                onTap: () {
                   Navigator.push(
-                            context,
-                            new MaterialPageRoute(
-                                builder: (context) =>
-                                     EventDetails(userId, snapshot.data.documents[index].documentID, (gender==true?"Boys":"Girls") + " / "+ sportsItem["title"] + " / "+category["name"])));
-                      
+                      context,
+                      new MaterialPageRoute(
+                          builder: (context) => EventDetails(
+                              userId,
+                              snapshot.data.documents[index].documentID,
+                              (gender == true ? "Boys" : "Girls") +
+                                  " / " +
+                                  sportsItem["title"] +
+                                  " / " +
+                                  category["name"])));
                 },
                 child: Card(
-                child: new Container(
-                  padding: EdgeInsets.all(10.0),
-                  child: new Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            displayTeams(snapshot.data.documents[index]["teams"]),
-                            displayLocation(snapshot.data.documents[index]["location"]),
-                            displayStatus(snapshot.data.documents[index]["status"])
-                          ],
-                        )
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                  child: new Container(
+                      padding: EdgeInsets.all(10.0),
+                      child: new Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
-                          displayTimeAndDate(snapshot.data.documents[index]["startTime"]),
+                          Expanded(
+                              child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              displayTeams(
+                                  snapshot.data.documents[index]["teams"]),
+                              displayLocation(
+                                  snapshot.data.documents[index]["location"]),
+                              displayStatus(
+                                  snapshot.data.documents[index]["status"])
+                            ],
+                          )),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              displayTimeAndDate(
+                                  snapshot.data.documents[index]["startTime"]),
+                            ],
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              subscribeToEvent(
+                                  snapshot.data.documents[index].documentID),
+                            ],
+                          )
                         ],
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          subscribeToEvent(snapshot.data.documents[index].documentID),
-                        ],
-                      )
-                    ],
-                  )
-                ),
-              ));
-            },
-            childCount: snapshot.data.documents.length
-            ),
-          )
-        ],
-      );
+                      )),
+                ));
+          }, childCount: snapshot.data.documents.length),
+        )
+      ],
+    );
   }
 
-  
-
   displayTeams(teams) {
-    if(teams != null && teams.length == 2){
+    if (teams != null && teams.length == 2) {
       return Text(
-        (teams[0]["name"] != null ? teams[0]["name"] : "--") + " vs " + (teams[1]["name"] != null ? teams[1]["name"] : "--"),
-        style: TextStyle(
-            color: Colors.black,
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-            fontFamily: "WorkSansSemiBold"
-          )
-        );
-    } else if(teams != null && teams.length == 1){
+          (teams[0]["name"] != null ? teams[0]["name"] : "--") +
+              " vs " +
+              (teams[1]["name"] != null ? teams[1]["name"] : "--"),
+          style: TextStyle(
+              color: Colors.black,
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+              fontFamily: "WorkSansSemiBold"));
+    } else if (teams != null && teams.length == 1) {
       return Text(
-        (teams[0]["name"] != null ? teams[0]["name"] : "--") +" vs --",
-        style: TextStyle(
-            color: Colors.black,
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-            fontFamily: "WorkSansSemiBold"
-          ));
-    } else if(teams != null && teams.length >= 2){
+          (teams[0]["name"] != null ? teams[0]["name"] : "--") + " vs --",
+          style: TextStyle(
+              color: Colors.black,
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+              fontFamily: "WorkSansSemiBold"));
+    } else if (teams != null && teams.length >= 2) {
       return Text("");
     } else {
       return Text("");
     }
-                          
   }
+
   displayLocation(location) {
-    if(location != null){
-      return Text(
-        location,
-        textAlign: TextAlign.left);
+    if (location != null) {
+      return Text(location, textAlign: TextAlign.left);
     } else {
       return Text("");
     }
@@ -237,107 +244,109 @@ class _ScheduleScreenState extends State<ScheduleScreen>{
     "December"
   ];
 
-  displayTimeAndDate(Timestamp startTime){
+  displayTimeAndDate(Timestamp startTime) {
     DateTime date = startTime.toDate();
     //DateTime date = DateTime.parse(startTime.toString());
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: <Widget>[
-        getTime(date),
-        getDate(date),        
-    ]);
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          getTime(date),
+          getDate(date),
+        ]);
   }
 
-  getDate(DateTime startTime){
-    if(startTime != null){
-      return Text(startTime.day.toString()+" "+months[startTime.month]);
+  getDate(DateTime startTime) {
+    if (startTime != null) {
+      return Text(startTime.day.toString() + " " + months[startTime.month]);
     } else {
       return Text("");
     }
   }
 
-  getTime(DateTime startTime){
-    if(startTime != null){
-      String padding = startTime.minute <= 9 ? "0": "";
+  getTime(DateTime startTime) {
+    if (startTime != null) {
+      String padding = startTime.minute <= 9 ? "0" : "";
       String hour = startTime.hour.toString();
       String sufix = "AM";
-      if(startTime.hour >= 12){
-        hour = (startTime.hour-12).toString();
+      if (startTime.hour >= 12) {
+        hour = (startTime.hour - 12).toString();
         sufix = "PM";
       }
       return Text(
-        hour
-        +":"
-        +padding
-        +startTime.minute.toString()
-        +" "
-        +sufix,
-        style: TextStyle(
-          fontSize: 24.0    
-        ));
+          hour + ":" + padding + startTime.minute.toString() + " " + sufix,
+          style: TextStyle(fontSize: 24.0));
     } else {
       return Text("");
     }
   }
-  
-  displayStatus(String status){
+
+  displayStatus(String status) {
     return Text(status);
   }
 
-  
-  subscribeToEvent(documentID){
+  subscribeToEvent(documentID) {
     subscription.putIfAbsent(documentID, () => false);
     return Container(
-      padding: EdgeInsets.all(10.0),
-      child: InkWell(
+        padding: EdgeInsets.all(10.0),
+        child: InkWell(
             onTap: () {
               updateData(documentID);
             },
             child: Image.asset(
-                 subscription[documentID]?"assets/images/bell-solid.png":"assets/images/bell-regular.png",
-                width: 30,
-              )));
+              subscription[documentID]
+                  ? "assets/images/bell-solid.png"
+                  : "assets/images/bell-regular.png",
+              width: 30,
+            )));
   }
 
-  updateData(key){
-    DocumentReference subscriptionDocumentReference =  Firestore.instance.collection("devices").document("preferences").collection(this.userId).document("subscriptions");
-    if(!subscription[key]){
+  updateData(key) {
+    DocumentReference subscriptionDocumentReference = Firestore.instance
+        .collection("devices")
+        .document("preferences")
+        .collection(this.userId)
+        .document("subscriptions");
+    if (!subscription[key]) {
       subscribeToTopic(key);
     } else {
       unSubscribeToTopic(key);
     }
-    if(!recordExist){
+    if (!recordExist) {
       subscriptionDocumentReference.setData({key: !subscription[key]});
     } else {
       subscriptionDocumentReference.updateData({key: !subscription[key]});
     }
   }
 
-  subscribeToTopic(key){
-    print("subscribed: "+key);
+  subscribeToTopic(key) {
+    print("subscribed: " + key);
     firebaseMessaging.subscribeToTopic(key);
   }
 
-  unSubscribeToTopic(key){
-    print("unsubscribed: "+key);
+  unSubscribeToTopic(key) {
+    print("unsubscribed: " + key);
     firebaseMessaging.unsubscribeFromTopic(key);
   }
 
-  fetchSubscriptionData(){
-    Stream<DocumentSnapshot> subscriptionSnapshot = Firestore.instance.collection("devices").document("preferences").collection(this.userId).document("subscriptions").snapshots();
-  
+  fetchSubscriptionData() {
+    Stream<DocumentSnapshot> subscriptionSnapshot = Firestore.instance
+        .collection("devices")
+        .document("preferences")
+        .collection(this.userId)
+        .document("subscriptions")
+        .snapshots();
+
     subscriptionSnapshot.listen((documentData) {
       if (!mounted) return;
       setState(() {
-        if(documentData.data == null){
+        if (documentData.data == null) {
           subscription = {};
         } else {
           subscription = documentData.data;
           recordExist = true;
         }
       });
-    });   
+    });
   }
-  
 }

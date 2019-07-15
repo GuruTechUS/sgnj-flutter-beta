@@ -57,7 +57,14 @@ class _ContactsState extends State<Contacts> {
   renderLinkList(AsyncSnapshot<QuerySnapshot> snapshot){
       return CustomScrollView(
         slivers: <Widget>[
-          SliverList(
+          snapshot.data.documents.length == 0
+            ? SliverFillRemaining(
+              child:Card(
+                child: Center(
+                  child: Text("No contacts available!!"),
+                ),
+              ))
+        : SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               return Card(
                 child: new Container(

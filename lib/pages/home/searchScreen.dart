@@ -316,7 +316,14 @@ class _SearchScreenState extends State<SearchScreen> {
 
       return CustomScrollView(
         slivers: <Widget>[
-          SliverList(
+          snapshot.data.documents.length == 0
+            ? SliverFillRemaining(
+              child:Card(
+                child: Center(
+                  child: Text("No search results found!"),
+                ),
+              ))
+        : SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               return InkWell(
                 onTap: (){ 
@@ -432,7 +439,6 @@ class _SearchScreenState extends State<SearchScreen> {
 
   displayTimeAndDate(Timestamp startTime){
     DateTime date = startTime.toDate();
-    print(date);
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -451,7 +457,6 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   getTime(DateTime startTime){
-    print(startTime);
     if(startTime != null){
       String padding = startTime.minute <= 9 ? "0": "";
       String hour = startTime.hour.toString();
@@ -481,7 +486,6 @@ class _SearchScreenState extends State<SearchScreen> {
 
   
   subscribeToEvent(documentID){
-    print("======6======");
     subscription.putIfAbsent(documentID, () => false);
     return Container(
       padding: EdgeInsets.all(10.0),
@@ -520,12 +524,9 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   fetchSubscriptionData(){
-    print("======4======");
     Stream<DocumentSnapshot> subscriptionSnapshot = Firestore.instance.collection("devices").document("preferences").collection(this.userId).document("subscriptions").snapshots();
   
     subscriptionSnapshot.listen((documentData) {
-      print("======5======");
-      print("check: "+documentData.data.toString());
       if (!mounted) return;
       setState(() {
         if(documentData.data == null){

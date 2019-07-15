@@ -16,8 +16,7 @@ class _LinksState extends State<Links>{
 
   FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
 
-  _LinksState(){
-  }
+  _LinksState();
 
   @override
   void initState() {
@@ -52,7 +51,14 @@ class _LinksState extends State<Links>{
   renderLinkList(AsyncSnapshot<QuerySnapshot> snapshot){
       return CustomScrollView(
         slivers: <Widget>[
-          SliverList(
+          snapshot.data.documents.length == 0
+            ? SliverFillRemaining(
+              child:Card(
+                child: Center(
+                  child: Text("No documents/links available!!"),
+                ),
+              ))
+        : SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               return Card(
                 child: new Container(

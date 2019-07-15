@@ -25,9 +25,8 @@ class _AddEventState extends State<AddEvent>{
   final dateFormat2 = DateFormat("d MMMM yyyy 'at' hh:mm:ss a");
   bool isSubmitting = false;
   
-  _AddEventState(){
-    
-  }
+  _AddEventState();
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

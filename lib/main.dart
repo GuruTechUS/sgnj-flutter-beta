@@ -38,12 +38,15 @@ class _MyAppState extends State<MyApp> {
     _firebaseMessaging.configure(
       onLaunch: (Map<String,dynamic> msg){
         print("onLaunch called");
+        return Future<dynamic>.value(msg);
       },
       onMessage: (Map<String,dynamic> msg){
         print("onMessage called");
+        return Future<dynamic>.value(msg);
       },
       onResume: (Map<String,dynamic> msg){
         print("onResume called");
+        return Future<dynamic>.value(msg);
       }
     );
     _firebaseMessaging.requestNotificationPermissions(
